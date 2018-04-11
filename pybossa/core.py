@@ -24,6 +24,7 @@ from flask import Flask, url_for, request, render_template, \
 from flask.ext.login import current_user
 from flask.ext.babel import gettext
 from flask.ext.assets import Bundle
+from flasgger import Swagger
 from flask_json_multidict import get_json_multidict
 from pybossa import default_settings as settings
 from pybossa.extensions import *
@@ -38,6 +39,7 @@ from pybossa.messages import *
 def create_app(run_as_server=True):
     """Create web app."""
     app = Flask(__name__)
+    swagger = Swagger(app)
     configure_app(app)
     setup_assets(app)
     setup_cache_timeouts(app)

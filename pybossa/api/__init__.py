@@ -215,6 +215,8 @@ def user_progress(project_id=None, short_name=None):
        This will mean that the user has done a 10% of the available tasks for
        him
 
+    file: swagger/user_progress.yml
+
     """
     if project_id or short_name:
         if short_name:

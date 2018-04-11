@@ -1,0 +1,11 @@
+API endpoint for user progress.
+Return a JSON object with two fields regarding the tasks for the user:
+With the fields: done and total.
+---
+responses:
+  200:
+    description: A JSON object of user progress
+    schema:
+      $ref: '#/definitions/Palette'
+    examples:
+      progress: {'done': 10, 'total': 100}
