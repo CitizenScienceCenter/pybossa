@@ -47,6 +47,8 @@ from pybossa.model.task import Task
 from pybossa.cache.projects import clean_project
 from pybossa.cache.users import delete_user_summary_id
 
+from flasgger.utils import swag_from
+
 repos = {'Task': {'repo': task_repo, 'filter': 'filter_tasks_by',
                   'get': 'get_task', 'save': 'save', 'update': 'update',
                   'delete': 'delete'},
@@ -106,6 +108,7 @@ class APIBase(MethodView):
 
     @jsonpify
     @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
+    @swag_from('swagger/template.yml')
     def get(self, oid):
         """Get an object.
 
@@ -117,6 +120,7 @@ class APIBase(MethodView):
         :returns: The JSON item/s stored in the DB
 
         """
+        print(self, oid)
         try:
             ensure_authorized_to('read', self.__class__)
             query = self._db_query(oid)
@@ -277,6 +281,7 @@ class APIBase(MethodView):
 
     @jsonpify
     @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
+    @swag_from('swagger/template.yml')
     def post(self):
         """Post an item to the DB with the request.data JSON object.
 
