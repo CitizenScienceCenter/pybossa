@@ -215,7 +215,16 @@ def user_progress(project_id=None, short_name=None):
        This will mean that the user has done a 10% of the available tasks for
        him
 
-    file: swagger/user_progress.yml
+    Return a JSON object with two fields regarding the tasks for the user:
+    With the fields: done and total.
+    ---
+    responses:
+      200:
+        description: A JSON object of user progress
+        schema:
+          $ref: '#/definitions/Palette'
+        examples:
+          progress: {'done': 10, 'total': 100}
 
     """
     if project_id or short_name:
