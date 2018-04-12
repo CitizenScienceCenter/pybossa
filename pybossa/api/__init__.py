@@ -34,6 +34,7 @@ import jwt
 from flask import Blueprint, request, abort, Response, make_response
 from flask import current_app
 from flask.ext.login import current_user
+from flasgger.utils import swag_from
 from werkzeug.exceptions import NotFound
 from pybossa.util import jsonpify, get_user_id_or_ip, fuzzyboolean
 from pybossa.util import get_disqus_sso_payload
@@ -205,6 +206,7 @@ def _retrieve_new_task(project_id):
 @blueprint.route('/app/<int:project_id>/userprogress')
 @blueprint.route('/project/<int:project_id>/userprogress')
 @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
+@swag_from('swagger/user_progress.yml')
 def user_progress(project_id=None, short_name=None):
     """API endpoint for user progress.
 
@@ -214,17 +216,6 @@ def user_progress(project_id=None, short_name=None):
         }
        This will mean that the user has done a 10% of the available tasks for
        him
-
-    Return a JSON object with two fields regarding the tasks for the user:
-    With the fields: done and total.
-    ---
-    responses:
-      200:
-        description: A JSON object of user progress
-        schema:
-          $ref: '#/definitions/Palette'
-        examples:
-          progress: {'done': 10, 'total': 100}
 
     """
     if project_id or short_name:
