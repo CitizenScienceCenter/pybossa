@@ -26,6 +26,7 @@ from werkzeug.exceptions import BadRequest
 from pybossa.model.result import Result
 from api_base import APIBase
 
+from flasgger.utils import swag_from
 
 class ResultAPI(APIBase):
 
@@ -34,6 +35,10 @@ class ResultAPI(APIBase):
     __class__ = Result
     reserved_keys = set(['id', 'created', 'project_id',
                          'task_id', 'task_run_ids', 'last_version'])
+
+    @swag_from('swagger/result/GET.yml')
+    def get(self, oid):
+        super(self, oid)
 
     def _forbidden_attributes(self, data):
         for key in data.keys():

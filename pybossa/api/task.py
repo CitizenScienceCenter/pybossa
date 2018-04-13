@@ -28,6 +28,7 @@ from pybossa.model.task import Task
 from pybossa.core import result_repo
 from api_base import APIBase
 
+from flasgger.utils import swag_from
 
 class TaskAPI(APIBase):
 
@@ -35,6 +36,10 @@ class TaskAPI(APIBase):
 
     __class__ = Task
     reserved_keys = set(['id', 'created', 'state', 'fav_user_ids'])
+
+    @swag_from('swagger/task/GET.yml')
+    def get(self, oid):
+        super(self, oid)
 
     def _forbidden_attributes(self, data):
         for key in data.keys():

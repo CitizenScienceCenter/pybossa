@@ -82,6 +82,9 @@ caching = {'Project': {'refresh': clean_project},
 
 error = ErrorStatus()
 
+def swagger_def(s):
+    return swag_from('swagger/template.yml')
+
 
 class APIBase(MethodView):
 
@@ -108,7 +111,6 @@ class APIBase(MethodView):
 
     @jsonpify
     @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
-    @swag_from('swagger/template.yml')
     def get(self, oid):
         """Get an object.
 
@@ -281,7 +283,6 @@ class APIBase(MethodView):
 
     @jsonpify
     @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
-    @swag_from('swagger/template.yml')
     def post(self):
         """Post an item to the DB with the request.data JSON object.
 

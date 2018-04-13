@@ -74,7 +74,7 @@ def index():  # pragma: no cover
     """Return dummy text for welcome page."""
     return 'The %s API' % current_app.config.get('BRAND')
 
-
+# follows http://flask.pocoo.org/docs/0.12/views/
 def register_api(view, endpoint, url, pk='id', pk_type='int'):
     """Register API endpoints.
 
@@ -206,7 +206,6 @@ def _retrieve_new_task(project_id):
 @blueprint.route('/app/<int:project_id>/userprogress')
 @blueprint.route('/project/<int:project_id>/userprogress')
 @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
-@swag_from('swagger/user_progress.yml')
 def user_progress(project_id=None, short_name=None):
     """API endpoint for user progress.
 

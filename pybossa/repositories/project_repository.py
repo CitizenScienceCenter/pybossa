@@ -26,6 +26,8 @@ from pybossa.exc import WrongObjectError, DBIntegrityError
 from pybossa.cache import projects as cached_projects
 from pybossa.core import uploader
 
+from flasgger.utils import swag_from
+
 
 class ProjectRepository(Repository):
 
@@ -81,6 +83,7 @@ class ProjectRepository(Repository):
 
 
     # Methods for Category objects
+    @swag_from('swagger/template.yml')
     def get_category(self, id=None):
         if id is None:
             return self.db.session.query(Category).first()

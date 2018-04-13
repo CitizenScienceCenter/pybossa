@@ -39,7 +39,6 @@ from pybossa.messages import *
 def create_app(run_as_server=True):
     """Create web app."""
     app = Flask(__name__)
-    swagger = Swagger(app)
     configure_app(app)
     setup_assets(app)
     setup_cache_timeouts(app)
@@ -81,6 +80,7 @@ def create_app(run_as_server=True):
     plugin_manager.install_plugins()
     import pybossa.model.event_listeners
     setup_upref_mdata(app)
+    swagger = Swagger(app)
     return app
 
 

@@ -34,6 +34,8 @@ from pybossa.ratelimit import ratelimit
 from pybossa.error import ErrorStatus
 from pybossa.model.task import Task
 
+from flasgger.utils import swag_from
+
 error = ErrorStatus()
 
 
@@ -45,6 +47,7 @@ class FavoritesAPI(APIBase):
 
     @jsonpify
     @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
+    @swag_from('swagger/favorites/GET.yml')
     def get(self, oid):
         """Return all the tasks favorited by current user."""
         try:

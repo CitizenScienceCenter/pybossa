@@ -32,6 +32,8 @@ from pybossa.util import is_reserved_name
 from pybossa.core import auditlog_repo, result_repo
 from pybossa.auditlogger import AuditLogger
 
+from flasgger.utils import swag_from
+
 auditlogger = AuditLogger(auditlog_repo, caller='api')
 
 
@@ -48,6 +50,10 @@ class ProjectAPI(APIBase):
     reserved_keys = set(['id', 'created', 'updated', 'completed', 'contacted',
                          'published', 'secret_key'])
     private_keys = set(['secret_key'])
+
+    @swag_from('swagger/project/GET.yml')
+    def get(self, oid):
+        super(self, oid)
 
     def _create_instance_from_request(self, data):
         inst = super(ProjectAPI, self)._create_instance_from_request(data)
