@@ -1,27 +1,14 @@
-Example endpoint returning a list of colors by palette
-In this example the specification is taken from external YAML file
+POST a favourite task for the current user
 ---
 parameters:
-  - name: palette
-    in: path
+  - name: task_id
+    in: task_id
     type: string
-    enum: ['all', 'rgb', 'cmyk']
     required: true
-    default: all
-definitions:
-  Palette:
-    type: object
-    properties:
-      palette_name:
-        type: array
-        items:
-          $ref: '#/definitions/Color'
-  Color:
-    type: string
+produces:
+  - application/json
 responses:
   200:
-    description: A list of colors (may be filtered by palette)
-    schema:
-      $ref: '#/definitions/Palette'
-    examples:
-      rgb: ['red', 'green', 'blue']
+    description: The task that was favorited
+  401:
+    description: Access Denied

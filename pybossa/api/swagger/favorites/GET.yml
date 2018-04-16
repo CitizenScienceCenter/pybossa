@@ -1,6 +1,5 @@
 GET all tasks favorited by the current user
 ---
-basePath: /favorites
 parameters:
   - name: last_id
     in: oid

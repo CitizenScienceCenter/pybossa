@@ -50,7 +50,7 @@ swagger_base = {
     "version": "0.0.1"
   },
   "host": "localhost:5000",  # overrides localhost:500
-  "basePath": "/api",  # base bash for blueprint registration
+  "basePath": "",  # base bash for blueprint registration
   "schemes": [
     "http",
     "https"
