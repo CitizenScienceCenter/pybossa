@@ -76,6 +76,7 @@ class FavoritesAPI(APIBase):
 
     @jsonpify
     @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))
+    @swag_from('swagger/favorites/POST.yml')
     def post(self):
         """Add User ID to task as a favorite."""
         try:

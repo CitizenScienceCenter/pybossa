@@ -35,6 +35,28 @@ from pybossa.news import FEED_KEY as NEWS_FEED_KEY
 from pybossa.news import get_news
 from pybossa.messages import *
 
+swagger_base = {
+  "swagger": "2.0",
+  "info": {
+    "title": "Pybossa API",
+    "description": "API for the Pybossa project",
+    "contact": {
+      "responsibleOrganization": "Pybossa",
+      "responsibleDeveloper": "Pybossa",
+      "email": "me@me.com",
+      "url": "www.pybossa.com",
+    },
+    "termsOfService": "NOT SET",
+    "version": "0.0.1"
+  },
+  "host": "localhost:5000",  # overrides localhost:500
+  "basePath": "/api",  # base bash for blueprint registration
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "operationId": "pbData"
+}
 
 def create_app(run_as_server=True):
     """Create web app."""
@@ -80,7 +102,7 @@ def create_app(run_as_server=True):
     plugin_manager.install_plugins()
     import pybossa.model.event_listeners
     setup_upref_mdata(app)
-    swagger = Swagger(app)
+    swagger = Swagger(app, template=swagger_base)
     return app
 
 
