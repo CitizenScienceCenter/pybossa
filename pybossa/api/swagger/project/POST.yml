@@ -5,7 +5,7 @@ security:
 parameters:
   - name: project
     in: body
-    type: string
+    type: object
     required: true
 produces:
   - application/json

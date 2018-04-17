@@ -39,7 +39,7 @@ class TaskAPI(APIBase):
 
     @swag_from('swagger/task/GET.yml')
     def get(self, oid):
-        super(self, oid)
+       return APIBase.get(self, oid)
 
     def _forbidden_attributes(self, data):
         for key in data.keys():
