@@ -1,14 +1,16 @@
 POST a favourite task for the current user
 ---
+security:
+  - APIKeyQueryParam: []
 parameters:
-  - name: api_key
-    in: query
+  - name: project
+    in: body
     type: string
     required: true
 produces:
   - application/json
 responses:
   200:
-    description: The task that was favorited
+    description: The project that was created
   401:
     description: Access Denied

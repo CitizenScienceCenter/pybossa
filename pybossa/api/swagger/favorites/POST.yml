@@ -1,10 +1,8 @@
 POST a favourite task for the current user
 ---
+security:
+  - APIKeyQueryParam: []
 parameters:
-  - name: api_key
-    in: query
-    type: string
-    required: true
   - in: body
     name: task_id
     description: The task ID to favorite
