@@ -1,10 +1,20 @@
 POST a favourite task for the current user
 ---
 parameters:
-  - name: task_id
-    in: task_id
+  - name: api_key
+    in: query
     type: string
     required: true
+  - in: body
+    name: task_id
+    description: The task ID to favorite
+    schema:
+      type: object
+      required:
+        - task_id
+      properties:
+        task_id:
+          type: integer
 produces:
   - application/json
 responses:

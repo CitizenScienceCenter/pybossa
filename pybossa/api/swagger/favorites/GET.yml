@@ -1,8 +1,8 @@
 GET all tasks favorited by the current user
 ---
 parameters:
-  - name: last_id
-    in: oid
+  - name: oid
+    in: path
     type: string
     required: false
   - name: description

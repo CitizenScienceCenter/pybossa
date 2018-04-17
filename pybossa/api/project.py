@@ -53,7 +53,11 @@ class ProjectAPI(APIBase):
 
     @swag_from('swagger/project/GET.yml')
     def get(self, oid):
-        super(self, oid)
+        return APIBase.get(self, oid)
+
+    @swag_from('swagger/project/POST.yml')
+    def post(self):
+        return APIBase.post(self)
 
     def _create_instance_from_request(self, data):
         inst = super(ProjectAPI, self)._create_instance_from_request(data)

@@ -43,7 +43,7 @@ swagger_base = {
     "contact": {
       "responsibleOrganization": "Pybossa",
       "responsibleDeveloper": "Pybossa",
-      "email": "me@me.com",
+      "email": "support@scifabric.com",
       "url": "www.pybossa.com",
     },
     "termsOfService": "NOT SET",
@@ -55,6 +55,7 @@ swagger_base = {
     "http",
     "https"
   ],
+  "securityDefinitions": { "APIKeyQueryParam": { "type": "apiKey", "name": "api_key", "in": "query" }},
   "operationId": "pbData"
 }
 
