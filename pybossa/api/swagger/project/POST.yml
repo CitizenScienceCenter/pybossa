@@ -1,7 +1,9 @@
-POST a favourite task for the current user
+POST to create a project
 ---
 security:
   - APIKeyQueryParam: []
+tags:
+  - Projects
 parameters:
   - name: project
     in: body

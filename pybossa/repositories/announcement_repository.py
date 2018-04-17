@@ -30,39 +30,10 @@ class AnnouncementRepository(Repository):
     def __init__(self, db):
         self.db = db
 
-    @swag_from('swagger/template.yml')
     def get(self, id):
         return self.db.session.query(Announcement).get(id)
 
     def get_all_announcements(self):
-        """Example endpoint returning a list of colors by palette
-        This is using docstrings for specifications.
-        ---
-        parameters:
-        - name: palette
-            in: path
-            type: string
-            enum: ['all', 'rgb', 'cmyk']
-            required: true
-            default: all
-        definitions:
-        Palette:
-            type: object
-            properties:
-            palette_name:
-                type: array
-                items:
-                $ref: '#/definitions/Color'
-        Color:
-            type: string
-        responses:
-        200:
-            description: A list of colors (may be filtered by palette)
-            schema:
-            $ref: '#/definitions/Palette'
-            examples:
-            rgb: ['red', 'green', 'blue']
-        """
         return self.db.session.query(Announcement).all()
 
     def get_by(self, **attributes):

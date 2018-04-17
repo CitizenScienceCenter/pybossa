@@ -1,0 +1,343 @@
+{
+  "basePath": "",
+  "definitions": {},
+  "host": "localhost:5000",
+  "info": {
+    "contact": {
+      "email": "support@scifabric.com",
+      "responsibleDeveloper": "Pybossa",
+      "responsibleOrganization": "Pybossa",
+      "url": "www.pybossa.com"
+    },
+    "description": "API for the Pybossa project",
+    "termsOfService": "NOT SET",
+    "title": "Pybossa API",
+    "version": "0.0.1"
+  },
+  "operationId": "pbData",
+  "paths": {
+    "/api/favorites": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "desc",
+            "name": "description",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of tasks currently favorited by the user"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "GET all tasks favorited by the current user"
+      },
+      "post": {
+        "parameters": [
+          {
+            "description": "The task ID to favorite",
+            "in": "body",
+            "name": "task_id",
+            "schema": {
+              "properties": {
+                "task_id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "task_id"
+              ],
+              "type": "object"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The task that was favorited"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "POST a favourite task for the current user"
+      }
+    },
+    "/api/favorites/{oid}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "desc",
+            "name": "description",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of tasks currently favorited by the user"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "GET all tasks favorited by the current user"
+      }
+    },
+    "/api/project": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of projects requested (or the project matching the provided ID)"
+          }
+        },
+        "summary": "GET all projects",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "project",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The project that was created"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "POST to create a project",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/api/project/{oid}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The project that was deleted"
+          }
+        },
+        "summary": "DELETE an existing isntance of Project",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of projects requested (or the project matching the provided ID)"
+          }
+        },
+        "summary": "GET all projects",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The project that was changed"
+          }
+        },
+        "summary": "Change an existing isntance of Project",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/api/result": {
+      "get": {
+        "description": "In this example the specification is taken from external YAML file<br/>",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "palette",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of colors (may be filtered by palette)",
+            "examples": {
+              "rgb": [
+                "red",
+                "green",
+                "blue"
+              ]
+            }
+          }
+        },
+        "summary": "Example endpoint returning a list of colors by palette"
+      }
+    },
+    "/api/result/{oid}": {
+      "get": {
+        "description": "In this example the specification is taken from external YAML file<br/>",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "palette",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of colors (may be filtered by palette)",
+            "examples": {
+              "rgb": [
+                "red",
+                "green",
+                "blue"
+              ]
+            }
+          }
+        },
+        "summary": "Example endpoint returning a list of colors by palette"
+      }
+    },
+    "/api/task": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of projects requested (or the project matching the provided ID)"
+          }
+        },
+        "summary": "GET all tasks",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/task/{oid}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of projects requested (or the project matching the provided ID)"
+          }
+        },
+        "summary": "GET all tasks",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    }
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "securityDefinitions": {
+    "APIKeyQueryParam": {
+      "in": "query",
+      "name": "api_key",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0"
+}

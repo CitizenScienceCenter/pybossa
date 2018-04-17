@@ -1,5 +1,7 @@
 Change an existing isntance of Project
 ---
+tags:
+  - Projects
 parameters:
   - name: oid
     in: path
@@ -10,11 +12,6 @@ requestBody:
     multipart/form-data:
       schema:
         type: json
-
 responses:
   200:
-    description: A list of colors (may be filtered by palette)
-    schema:
-      $ref: '#/definitions/Palette'
-    examples:
-      rgb: ['red', 'green', 'blue']
+    description: The project that was changed

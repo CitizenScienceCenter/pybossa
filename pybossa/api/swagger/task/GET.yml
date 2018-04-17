@@ -1,5 +1,7 @@
 GET all tasks
 ---
+tags:
+  - Tasks
 parameters:
   - name: oid
     in: path

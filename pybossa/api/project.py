@@ -59,6 +59,14 @@ class ProjectAPI(APIBase):
     def post(self):
         return APIBase.post(self)
 
+    @swag_from('swagger/project/PUT.yml')
+    def put(self, oid):
+        return APIBase.put(self, oid)
+
+    @swag_from('swagger/project/DELETE.yml')
+    def delete(self, oid):
+        return APIBase.delete(self, oid)
+
     def _create_instance_from_request(self, data):
         inst = super(ProjectAPI, self)._create_instance_from_request(data)
         default_category = get_categories()[0]

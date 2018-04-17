@@ -1,5 +1,7 @@
 GET all projects
 ---
+tags:
+  - Projects
 parameters:
   - name: oid
     in: path

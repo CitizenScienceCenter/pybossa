@@ -43,5 +43,3 @@ cover/*
 coverage.xml
 htmlcov/*
 pybossa/themes/*
-.vscode/
-tags
