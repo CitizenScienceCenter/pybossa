@@ -40,6 +40,18 @@ class TaskAPI(APIBase):
     @swag_from('swagger/task/GET.yml')
     def get(self, oid):
        return APIBase.get(self, oid)
+    
+    @swag_from('swagger/task/PUT.yml')
+    def put(self, oid):
+       return APIBase.put(self, oid)
+
+    @swag_from('swagger/task/POST.yml')
+    def post(self):
+       return APIBase.post(self)
+
+    @swag_from('swagger/task/DELETE.yml')
+    def delete(self, oid):
+       return APIBase.delete(self, oid)
 
     def _forbidden_attributes(self, data):
         for key in data.keys():

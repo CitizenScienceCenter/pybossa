@@ -7,10 +7,14 @@ parameters:
     in: body
     type: object
     required: true
+    schema:
+      $ref: '#/definitons/Task'
 produces:
   - application/json
 responses:
   200:
     description: The task that was created
+    schema:
+      $ref: '#/definitons/Task'
   401:
     description: Access Denied

@@ -1,4 +1,4 @@
-DELETE an existing isntance of Project
+DELETE an existing instance of Project
 ---
 definitions:
   Project:

@@ -1,24 +1,45 @@
-Example endpoint returning a list of colors by palette
-In this example the specification is taken from external YAML file
+DELETE an existing instance of a Task
 ---
-parameters:
-  - name: id
-    in: path
-    type: string
-    required: false
-    default: None
 definitions:
-  Palette:
-    type: object
+  Task:
+    required:
+        - project_id
+        - info
+        - n_answers
+        - long_description
+        - owner_id
     properties:
-      palette_name:
-        type: array
-        items:
-          $ref: '#/definitions/Color'
-  Color:
-    type: string
+      project_id:
+        description: Project ID
+        type: integer
+        example: 1
+      info:
+        description: Task information
+        type: object
+        example:
+          question: Who am I?
+          user: HAL
+      n_answers:
+        description: Number of answers expected
+        type: integer
+        maxLength: 255
+        example: 30
+tags:
+  - Tasks
+security:
+  - APIKeyQueryParam: []
+parameters:
+  - name: oid
+    in: path
+    required: true
+  - name: task
+    required: true
+    in: body
+    type: object
+    schema:
+      $ref: '#/definitions/Task'
 responses:
   200:
-    description: A list of requested objects or those matching the supplied ID
-    examples:
-      projects: ['1', 'twtrsample', 'blue']
+    description: The task that was deleted
+    schema:
+      $ref: '#/definitons/Task'

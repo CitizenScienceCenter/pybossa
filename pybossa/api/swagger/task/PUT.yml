@@ -1,27 +1,21 @@
-Example endpoint returning a list of colors by palette
-In this example the specification is taken from external YAML file
+PUT to modify an existing instance of a Task
 ---
+tags:
+  - Tasks
+security:
+  - APIKeyQueryParam: []
 parameters:
-  - name: palette
+  - name: oid
     in: path
-    type: string
-    enum: ['all', 'rgb', 'cmyk']
     required: true
-    default: all
-definitions:
-  Palette:
+  - name: task
+    required: true
+    in: body
     type: object
-    properties:
-      palette_name:
-        type: array
-        items:
-          $ref: '#/definitions/Color'
-  Color:
-    type: string
+    schema:
+      $ref: '#/definitions/Task'
 responses:
   200:
-    description: A list of colors (may be filtered by palette)
+    description: The task that was edited
     schema:
-      $ref: '#/definitions/Palette'
-    examples:
-      rgb: ['red', 'green', 'blue']
+      $ref: '#/definitons/Task'
