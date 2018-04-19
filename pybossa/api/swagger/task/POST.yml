@@ -1,5 +1,7 @@
 POST to create a task
 ---
+tags:
+  - Tasks
 security:
   - APIKeyQueryParam: []
 parameters:
