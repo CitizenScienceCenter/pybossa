@@ -28,6 +28,8 @@ from werkzeug.exceptions import MethodNotAllowed
 from flask import request
 from flask.ext.login import current_user
 
+from flasgger.utils import swag_from
+
 
 class UserAPI(APIBase):
 
@@ -89,6 +91,14 @@ class UserAPI(APIBase):
                     attribute not in self.public_attributes):
                 return True
         return False
+
+    @swag_from('swagger/user/GET.yml')
+    def get(self, oid):
+        return APIBase.get(self, oid)
+
+    @swag_from('swagger/user/PUT.yml')
+    def put(self, oid):
+        return APIBase.put(self, oid)
 
     @jsonpify
     @ratelimit(limit=ratelimits.get('LIMIT'), per=ratelimits.get('PER'))

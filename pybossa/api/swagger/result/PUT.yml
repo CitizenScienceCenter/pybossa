@@ -1,6 +1,8 @@
 Example endpoint returning a list of colors by palette
 In this example the specification is taken from external YAML file
 ---
+tags:
+  - Results
 parameters:
   - name: palette
     in: path

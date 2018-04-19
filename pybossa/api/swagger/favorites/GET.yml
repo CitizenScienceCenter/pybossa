@@ -1,5 +1,7 @@
 GET all tasks favorited by the current user
 ---
+tags:
+  - Favorites
 parameters:
   - name: oid
     in: path

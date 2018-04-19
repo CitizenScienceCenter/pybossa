@@ -1,5 +1,7 @@
 DELETE a favourite task for the current user
 ---
+tags:
+  - Favorites
 parameters:
   - name: task_id
     in: task_id
