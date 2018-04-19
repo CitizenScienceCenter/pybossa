@@ -1,17 +1,82 @@
 DELETE an existing isntance of Project
 ---
+definitions:
+  Project:
+    required:
+        - name
+        - short_name
+        - description
+        - long_description
+        - owner_id
+    properties:
+      name:
+        description: Project name
+        type: string
+        example: My project
+        maxLength: 255
+      short_name:
+        description: Name to refer to project (slug)
+        type: string
+        example: myproj
+        maxLength: 255
+      description:
+        description: Short description
+        type: string
+        maxLength: 255
+        example: Here is my project
+      long_description:
+        description: A more detailed description
+        type: string
+        example: Here is my project with some more information
+      webhook:
+        description: Project webhook
+        type: string
+        example: http://myhost.com/hook
+      allow_anonymous_contributors:
+        description: Allow anonymous contributors
+        type: boolean
+        example: False
+      featured:
+        description: If the project is featured
+        type: boolean
+        example: False
+      owner_id:
+        description: Project owner ID
+        example: 1
+        type: integer
+      contacted:
+        description: If the project owner had been emailed
+        type: boolean
+        example: False
+      created:
+        description: Date the announcement was created
+        type: string
+        example: 12/04/1999
+      updated:
+        description: Date the announcement was last updated
+        type: string
+        example: 12/04/1999
+      published:
+        description: Whether the announcement has been published
+        type: boolean
+        example: False
+      user_id:
+        description: ID of the user creating/updating the announcement
+        type: integer
+        example: 1
+
 tags:
   - Projects
 parameters:
   - name: oid
     in: path
     required: true
-requestBody:
-  required: true
-  content:
-    multipart/form-data:
-      schema:
-        type: json
+  - name: project
+    required: true
+    in: body
+    type: object
+    schema:
+      $ref: '#/definitions/Project'
 responses:
   200:
     description: The project that was deleted

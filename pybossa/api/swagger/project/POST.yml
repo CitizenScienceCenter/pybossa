@@ -9,10 +9,14 @@ parameters:
     in: body
     type: object
     required: true
+    schema:
+      $ref: '#/definitions/Project'
 produces:
   - application/json
 responses:
   200:
     description: The project that was created
+    schema:
+      $ref: '#/definitions/Project'
   401:
     description: Access Denied

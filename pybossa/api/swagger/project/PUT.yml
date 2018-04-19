@@ -13,8 +13,8 @@ parameters:
     type: object
     schema:
       $ref: '#/definitions/Project'
-    example:
-      title: test
 responses:
   200:
     description: The project that was changed
+    schema:
+      $ref: '#/definitions/Project'

@@ -12,3 +12,5 @@ produces:
 responses:
   200:
     description: A list of projects requested (or the project matching the provided ID)
+    schema:
+      $ref: '#/definitions/Project'
