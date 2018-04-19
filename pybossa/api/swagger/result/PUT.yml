@@ -1,29 +1,20 @@
-Example endpoint returning a list of colors by palette
-In this example the specification is taken from external YAML file
+PUT a Result
 ---
 tags:
   - Results
 parameters:
-  - name: palette
-    in: path
-    type: string
-    enum: ['all', 'rgb', 'cmyk']
+  - name: oid
     required: true
-    default: all
-definitions:
-  Palette:
+    in: path
+    type: integer
+  - name: result
+    required: true
+    in: body
     type: object
-    properties:
-      palette_name:
-        type: array
-        items:
-          $ref: '#/definitions/Color'
-  Color:
-    type: string
+    schema:
+      $ref: '#/definitions/Result'
 responses:
   200:
-    description: A list of colors (may be filtered by palette)
+    description: Result created
     schema:
-      $ref: '#/definitions/Palette'
-    examples:
-      rgb: ['red', 'green', 'blue']
+      $ref: '#/definitions/Result'

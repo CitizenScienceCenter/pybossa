@@ -38,7 +38,19 @@ class ResultAPI(APIBase):
 
     @swag_from('swagger/result/GET.yml')
     def get(self, oid):
-        super(self, oid)
+        return APIBase.get(self, oid)
+    
+    @swag_from('swagger/result/PUT.yml')
+    def put(self, oid):
+        return APIBase.put(self, oid)
+
+    @swag_from('swagger/result/POST.yml')
+    def post(self):
+        return APIBase.post(self)
+
+    @swag_from('swagger/result/DELETE.yml')
+    def delete(self, oid):
+        return APIBase.delete(self, oid)
 
     def _forbidden_attributes(self, data):
         for key in data.keys():
