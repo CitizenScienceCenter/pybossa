@@ -1,27 +1,27 @@
-Example endpoint returning a list of colors by palette
-In this example the specification is taken from external YAML file
+PUT an annoucement
 ---
+tags:
+  - Announcements
+security:
+  - APIKeyQueryParam: []
 parameters:
-  - name: palette
+  - name: oid
     in: path
-    type: string
-    enum: ['all', 'rgb', 'cmyk']
     required: true
-    default: all
-definitions:
-  Palette:
+  - name: announcement
+    in: body
     type: object
-    properties:
-      palette_name:
-        type: array
-        items:
-          $ref: '#/definitions/Color'
-  Color:
-    type: string
+    required: true
+    schema:
+      $ref: '#/definitions/Announcement'
+    examples:
+      application/json:
+        {
+          "id": 38,
+          "title": "T-shirt"
+        }
+produces:
+  - application/json
 responses:
   200:
-    description: A list of colors (may be filtered by palette)
-    schema:
-      $ref: '#/definitions/Palette'
-    examples:
-      rgb: ['red', 'green', 'blue']
+    description: The modified announcement

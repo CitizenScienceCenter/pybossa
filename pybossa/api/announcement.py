@@ -28,6 +28,7 @@ from pybossa.core import user_repo, project_repo
 from flask.ext.login import current_user
 from werkzeug.exceptions import BadRequest, NotFound
 
+from flasgger.utils import swag_from
 
 class AnnouncementAPI(APIBase):
 
@@ -36,6 +37,22 @@ class AnnouncementAPI(APIBase):
     reserved_keys = set(['id', 'created', 'updated', 'user_id'])
 
     __class__ = Announcement
+
+    @swag_from('swagger/announcement/GET.yml')
+    def get(self, oid):
+        return APIBase.get(self, oid)
+
+    @swag_from('swagger/announcement/PUT.yml')
+    def put(self, oid):
+        return APIBase.put(self, oid)
+
+    @swag_from('swagger/announcement/POST.yml')
+    def post(self):
+        return APIBase.post(self)
+
+    @swag_from('swagger/announcement/DELETE.yml')
+    def delete(self, oid):
+        return APIBase.put(self, oid)
 
     def _forbidden_attributes(self, data):
         for key in data.keys():

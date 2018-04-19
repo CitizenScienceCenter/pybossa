@@ -24,8 +24,9 @@ from pybossa.model import DomainObject, make_timestamp
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.ext.mutable import MutableDict
 
+from flasgger.utils import extract_definitions
+
 class Announcement(db.Model, DomainObject):
-    """An Announcement"""
 
     __tablename__ = 'announcement'
 

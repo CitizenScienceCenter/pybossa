@@ -1,4 +1,4 @@
-Change an existing isntance of Project
+Change an existing instance of Project
 ---
 tags:
   - Projects
@@ -6,12 +6,15 @@ parameters:
   - name: oid
     in: path
     required: true
-requestBody:
-  required: true
-  content:
-    multipart/form-data:
-      schema:
-        type: json
+    type: integer
+  - name: project
+    required: true
+    in: body
+    type: object
+    schema:
+      $ref: '#/definitions/Project'
+    example:
+      title: test
 responses:
   200:
     description: The project that was changed

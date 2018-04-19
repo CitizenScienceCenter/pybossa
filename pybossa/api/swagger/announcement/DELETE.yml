@@ -1,24 +1,57 @@
-Example endpoint returning a list of colors by palette
-In this example the specification is taken from external YAML file
+DELETE an existing isntance of Announcement (only as admin)
 ---
-parameters:
-  - name: id
-    in: path
-    type: string
-    required: false
-    default: None
+tags:
+  - Announcements
 definitions:
-  Palette:
-    type: object
+  Announcement:
+    required:
+        - title
+        - body
     properties:
-      palette_name:
-        type: array
-        items:
-          $ref: '#/definitions/Color'
-  Color:
-    type: string
+      title:
+        description: Title of the announcement
+        type: string
+        example: I announced a thing
+      body:
+        description: Body of the announcement
+        type: string
+        example: Here are some details about the thing I announced
+      media_url:
+        description: URL for image to act as header for the post
+        type: string
+        example: http://myhost.com/img/img.png
+      created:
+        description: Date the announcement was created
+        type: string
+        example: 12/04/1999
+      updated:
+        description: Date the announcement was last updated
+        type: string
+        example: 12/04/1999
+      published:
+        description: Whether the announcement has been published
+        type: boolean
+        example: False
+      user_id:
+        description: ID of the user creating/updating the announcement
+        type: integer
+        example: 1
+security:
+  - ApiKeyQueryParam: []
+parameters:
+  - name: oid
+    in: path
+    required: true
+    type: integer
+  - name: announcement
+    required: true
+    in: body
+    type: object
+    schema:
+      $ref: '#/definitions/Announcement'
 responses:
   200:
-    description: A list of requested objects or those matching the supplied ID
-    examples:
-      projects: ['1', 'twtrsample', 'blue']
+    description: The announcement that was deleted
+    schema:
+      $ref: '#/definitions/Announcement'
+
