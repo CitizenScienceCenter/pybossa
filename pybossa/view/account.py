@@ -63,6 +63,7 @@ blueprint = Blueprint('account', __name__)
 
 mail_queue = Queue('email', connection=sentinel.master)
 
+from flasgger.utils import swag_from
 
 @blueprint.route('/')
 @blueprint.route('/page/<int:page>')
@@ -89,7 +90,8 @@ def index(page=1):
                update_feed=update_feed)
     return handle_content_type(tmp)
 
-
+@swag_from('swagger/account_signin_get.yml', methods=['GET'])
+@swag_from('swagger/account_signin_post.yml', methods=['POST'])
 @blueprint.route('/signin', methods=['GET', 'POST'])
 def signin():
     """
@@ -292,6 +294,8 @@ def confirm_email():
     return redirect_content_type(url_for('.profile', name=current_user.name))
 
 
+@swag_from('swagger/account_register_get.yml', methods=['GET'])
+@swag_from('swagger/account_register_post.yml', methods=['POST'])
 @blueprint.route('/register', methods=['GET', 'POST'])
 def register():
     """
@@ -424,7 +428,7 @@ def _update_user_with_valid_email(user, email_addr):
     flash(gettext('Your email has been validated.'))
     return _sign_in_user(user)
 
-
+@swag_from('swagger/account_profile_get.yml', methods=['GET'])
 @blueprint.route('/profile', methods=['GET'])
 def redirect_profile():
     """Redirect method for profile."""
@@ -440,7 +444,7 @@ def redirect_profile():
     else:
         return redirect_content_type(url_for('.profile', name=current_user.name))
 
-
+@swag_from('swagger/account_profile_get.yml', methods=['GET'])
 @blueprint.route('/<name>/', methods=['GET'])
 def profile(name):
     """

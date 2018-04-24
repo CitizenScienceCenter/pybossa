@@ -1,0 +1,19 @@
+GET to retrieve the current user's profile
+---
+tags:
+  - Users
+parameters:
+  - name: Content-Type
+    required: false
+    type: string
+    enum: [application/json, text/html]
+    in: header
+produces:
+  - application/json
+responses:
+  200:
+    description: The user info
+    content:
+        application/json
+  401:
+    description: Access Denied

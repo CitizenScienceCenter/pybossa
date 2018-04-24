@@ -1,0 +1,25 @@
+GET to retrieve the CSRF token for signing in a user
+---
+tags:
+  - Users
+parameters:
+  - name: user
+    required: false
+    in: body
+    type: object
+    schema:
+      $ref: '#/definitions/User'
+  - name: Content-Type
+    required: false
+    type: string
+    enum: [application/json, text/html]
+    in: header
+produces:
+  - application/json
+responses:
+  200:
+    description: The user was signed in successfully
+    content:
+        application/json
+  401:
+    description: Access Denied

@@ -1,5 +1,28 @@
 GET all users
 ---
+definitions:
+  User:
+    required:
+        - email
+        - password
+    properties:
+      fullname:
+        description: user's full name
+        type: string
+        example: Barry Manilow
+        maxLength: 255
+      email:
+        description: Contact email
+        type: string
+        example: barry@manilow.com
+        maxLength: 255
+      password:
+        description: user's password
+        type: string
+        maxLength: 255
+      confirm:
+        description: Whether the username has been confirmed
+        type: boolean
 tags:
   - Users
 parameters:
