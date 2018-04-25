@@ -8,6 +8,7 @@ parameters:
     type: string
     enum: [application/json, text/html]
     in: header
+    default: application/json
 produces:
   - application/json
 responses:

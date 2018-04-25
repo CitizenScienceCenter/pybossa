@@ -23,6 +23,15 @@ definitions:
       confirm:
         description: Whether the username has been confirmed
         type: boolean
+  BaseUser:
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+      password:
+        type: string
 tags:
   - Users
 parameters:
