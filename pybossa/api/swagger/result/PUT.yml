@@ -7,12 +7,13 @@ parameters:
     required: true
     in: path
     type: integer
-  - name: result
-    required: true
-    in: body
-    type: object
-    schema:
-      $ref: '#/definitions/Result'
+requestBody:
+  required: true
+  name: result
+  content:
+    application/json:
+      schema:
+        $ref: '#/definitions/Result'
 responses:
   200:
     description: Result created

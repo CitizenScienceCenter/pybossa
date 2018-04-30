@@ -1,4 +1,4 @@
-Change an existing isntance of a User
+Change an existing instance of a User
 ---
 tags:
   - Users
@@ -9,9 +9,9 @@ parameters:
 requestBody:
   required: true
   content:
-    multipart/form-data:
+    application/json:
       schema:
-        type: json
+        $ref: '#/definitions/User'
 responses:
   200:
     description: The user that was changed

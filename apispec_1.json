@@ -1,13 +1,225 @@
 {
-  "basePath": "",
-  "definitions": {},
+  "basePath": "/",
+  "definitions": {
+    "Announcement": {
+      "properties": {
+        "body": {
+          "description": "Body of the announcement",
+          "example": "Here are some details about the thing I announced",
+          "type": "string"
+        },
+        "created": {
+          "description": "Date the announcement was created",
+          "example": "12/04/1999",
+          "type": "string"
+        },
+        "media_url": {
+          "description": "URL for image to act as header for the post",
+          "example": "http://myhost.com/img/img.png",
+          "type": "string"
+        },
+        "published": {
+          "description": "Whether the announcement has been published",
+          "example": false,
+          "type": "boolean"
+        },
+        "title": {
+          "description": "Title of the announcement",
+          "example": "I announced a thing",
+          "type": "string"
+        },
+        "updated": {
+          "description": "Date the announcement was last updated",
+          "example": "12/04/1999",
+          "type": "string"
+        },
+        "user_id": {
+          "description": "ID of the user creating/updating the announcement",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "title",
+        "body"
+      ]
+    },
+    "BaseUser": {
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "Project": {
+      "properties": {
+        "allow_anonymous_contributors": {
+          "description": "Allow anonymous contributors",
+          "example": false,
+          "type": "boolean"
+        },
+        "contacted": {
+          "description": "If the project owner had been emailed",
+          "example": false,
+          "type": "boolean"
+        },
+        "created": {
+          "description": "Date the announcement was created",
+          "example": "12/04/1999",
+          "type": "string"
+        },
+        "description": {
+          "description": "Short description",
+          "example": "Here is my project",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "featured": {
+          "description": "If the project is featured",
+          "example": false,
+          "type": "boolean"
+        },
+        "long_description": {
+          "description": "A more detailed description",
+          "example": "Here is my project with some more information",
+          "type": "string"
+        },
+        "name": {
+          "description": "Project name",
+          "example": "My project",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "owner_id": {
+          "description": "Project owner ID",
+          "example": 1,
+          "type": "integer"
+        },
+        "published": {
+          "description": "Whether the announcement has been published",
+          "example": false,
+          "type": "boolean"
+        },
+        "short_name": {
+          "description": "Name to refer to project (slug)",
+          "example": "myproj",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "updated": {
+          "description": "Date the announcement was last updated",
+          "example": "12/04/1999",
+          "type": "string"
+        },
+        "user_id": {
+          "description": "ID of the user creating/updating the announcement",
+          "example": 1,
+          "type": "integer"
+        },
+        "webhook": {
+          "description": "Project webhook",
+          "example": "http://myhost.com/hook",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "short_name",
+        "description",
+        "long_description",
+        "owner_id"
+      ]
+    },
+    "Result": {
+      "properties": {
+        "info": {
+          "description": "Value of the result",
+          "example": {
+            "message": "task done"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "short_name",
+        "description",
+        "long_description",
+        "owner_id"
+      ]
+    },
+    "Task": {
+      "properties": {
+        "info": {
+          "description": "Task information",
+          "example": {
+            "question": "Who am I?",
+            "user": "HAL"
+          },
+          "type": "object"
+        },
+        "n_answers": {
+          "description": "Number of answers expected",
+          "example": 30,
+          "maxLength": 255,
+          "type": "integer"
+        },
+        "project_id": {
+          "description": "Project ID",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id",
+        "info",
+        "n_answers",
+        "long_description",
+        "owner_id"
+      ]
+    },
+    "User": {
+      "properties": {
+        "confirm": {
+          "description": "Whether the username has been confirmed",
+          "type": "boolean"
+        },
+        "email": {
+          "description": "Contact email",
+          "example": "barry@manilow.com",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "fullname": {
+          "description": "user's full name",
+          "example": "Barry Manilow",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "password": {
+          "description": "user's password",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    }
+  },
   "host": "localhost:5000",
   "info": {
     "contact": {
       "email": "support@scifabric.com",
-      "responsibleDeveloper": "Pybossa",
-      "responsibleOrganization": "Pybossa",
-      "url": "www.pybossa.com"
+      "url": "https://www.pybossa.com"
     },
     "description": "API for the Pybossa project",
     "termsOfService": "NOT SET",
@@ -16,6 +228,398 @@
   },
   "operationId": "pbData",
   "paths": {
+    "/account/profile": {
+      "get": {
+        "parameters": [
+          {
+            "default": "application/json",
+            "enum": [
+              "application/json",
+              "text/html"
+            ],
+            "in": "header",
+            "name": "Content-Type",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "content": "application/json",
+            "description": "The user info"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "GET to retrieve the current user's profile",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/account/register": {
+      "get": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/BaseUser"
+            },
+            "type": "object"
+          },
+          {
+            "default": "application/json",
+            "enum": [
+              "application/json",
+              "text/html"
+            ],
+            "in": "header",
+            "name": "Content-Type",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "content": "application/json",
+            "description": "The user was signed in successfully"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "GET to retrieve the CSRF token for signing in a user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            },
+            "type": "object"
+          },
+          {
+            "in": "header",
+            "name": "X-CSRFToken",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The user was signed in successfully"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "POST to sign in a user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/account/signin": {
+      "get": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/BaseUser"
+            },
+            "type": "object"
+          },
+          {
+            "default": "application/json",
+            "enum": [
+              "application/json",
+              "text/html"
+            ],
+            "in": "header",
+            "name": "Content-Type",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "content": "application/json",
+            "description": "The user was signed in successfully"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "GET to retrieve the CSRF token for signing in a user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            },
+            "type": "object"
+          },
+          {
+            "in": "header",
+            "name": "X-CSRFToken",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The user was signed in successfully"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "POST to sign in a user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/account/{name}/": {
+      "get": {
+        "parameters": [
+          {
+            "default": "application/json",
+            "enum": [
+              "application/json",
+              "text/html"
+            ],
+            "in": "header",
+            "name": "Content-Type",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "content": "application/json",
+            "description": "The user info"
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "summary": "GET to retrieve the current user's profile",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/announcement": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of announcements (or one matching the provided ID)",
+            "schema": {
+              "$ref": "#/definitions/Announcement"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "GET all annoucements",
+        "tags": [
+          "Announcements"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "announcement",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Announcement"
+            },
+            "type": "object"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The created announcement",
+            "schema": {
+              "$ref": "#/definitions/Announcement"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "POST an annoucement",
+        "tags": [
+          "Announcements"
+        ]
+      }
+    },
+    "/api/announcement/{oid}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "announcement",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Announcement"
+            },
+            "type": "object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The announcement that was deleted",
+            "schema": {
+              "$ref": "#/definitions/Announcement"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQueryParam": []
+          }
+        ],
+        "summary": "DELETE an existing isntance of Announcement (only as admin)",
+        "tags": [
+          "Announcements"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of announcements (or one matching the provided ID)",
+            "schema": {
+              "$ref": "#/definitions/Announcement"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "GET all annoucements",
+        "tags": [
+          "Announcements"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true
+          },
+          {
+            "examples": {
+              "application/json": {
+                "id": 38,
+                "title": "T-shirt"
+              }
+            },
+            "in": "body",
+            "name": "announcement",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Announcement"
+            },
+            "type": "object"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The modified announcement"
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "PUT an annoucement",
+        "tags": [
+          "Announcements"
+        ]
+      }
+    },
     "/api/favorites": {
       "get": {
         "parameters": [
@@ -43,7 +647,10 @@
             "description": "Access Denied"
           }
         },
-        "summary": "GET all tasks favorited by the current user"
+        "summary": "GET all tasks favorited by the current user",
+        "tags": [
+          "Favorites"
+        ]
       },
       "post": {
         "parameters": [
@@ -80,7 +687,10 @@
             "APIKeyQueryParam": []
           }
         ],
-        "summary": "POST a favourite task for the current user"
+        "summary": "POST a favourite task for the current user",
+        "tags": [
+          "Favorites"
+        ]
       }
     },
     "/api/favorites/{oid}": {
@@ -110,7 +720,10 @@
             "description": "Access Denied"
           }
         },
-        "summary": "GET all tasks favorited by the current user"
+        "summary": "GET all tasks favorited by the current user",
+        "tags": [
+          "Favorites"
+        ]
       }
     },
     "/api/project": {
@@ -128,7 +741,10 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of projects requested (or the project matching the provided ID)"
+            "description": "A list of projects requested (or the project matching the provided ID)",
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
           }
         },
         "summary": "GET all projects",
@@ -142,6 +758,9 @@
             "in": "body",
             "name": "project",
             "required": true,
+            "schema": {
+              "$ref": "#/definitions/Project"
+            },
             "type": "object"
           }
         ],
@@ -150,7 +769,10 @@
         ],
         "responses": {
           "200": {
-            "description": "The project that was created"
+            "description": "The project that was created",
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
           },
           "401": {
             "description": "Access Denied"
@@ -174,6 +796,15 @@
             "in": "path",
             "name": "oid",
             "required": true
+          },
+          {
+            "in": "body",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Project"
+            },
+            "type": "object"
           }
         ],
         "responses": {
@@ -181,7 +812,7 @@
             "description": "The project that was deleted"
           }
         },
-        "summary": "DELETE an existing isntance of Project",
+        "summary": "DELETE an existing instance of Project",
         "tags": [
           "Projects"
         ]
@@ -200,7 +831,10 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of projects requested (or the project matching the provided ID)"
+            "description": "A list of projects requested (or the project matching the provided ID)",
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
           }
         },
         "summary": "GET all projects",
@@ -213,15 +847,28 @@
           {
             "in": "path",
             "name": "oid",
-            "required": true
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Project"
+            },
+            "type": "object"
           }
         ],
         "responses": {
           "200": {
-            "description": "The project that was changed"
+            "description": "The project that was changed",
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
           }
         },
-        "summary": "Change an existing isntance of Project",
+        "summary": "Change an existing instance of Project",
         "tags": [
           "Projects"
         ]
@@ -229,54 +876,122 @@
     },
     "/api/result": {
       "get": {
-        "description": "In this example the specification is taken from external YAML file<br/>",
         "parameters": [
           {
             "in": "path",
-            "name": "palette",
-            "required": false,
-            "type": "string"
+            "name": "oid",
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of colors (may be filtered by palette)",
-            "examples": {
-              "rgb": [
-                "red",
-                "green",
-                "blue"
-              ]
+            "description": "List of results",
+            "schema": {
+              "$ref": "#/definitions/Result"
             }
           }
         },
-        "summary": "Example endpoint returning a list of colors by palette"
+        "summary": "GET a list of results (or one matching the ID)",
+        "tags": [
+          "Results"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "result",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Result"
+            },
+            "type": "object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result created",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          }
+        },
+        "summary": "POST a Result",
+        "tags": [
+          "Results"
+        ]
       }
     },
     "/api/result/{oid}": {
-      "get": {
-        "description": "In this example the specification is taken from external YAML file<br/>",
+      "delete": {
         "parameters": [
           {
             "in": "path",
-            "name": "palette",
-            "required": false,
-            "type": "string"
+            "name": "oid",
+            "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of colors (may be filtered by palette)",
-            "examples": {
-              "rgb": [
-                "red",
-                "green",
-                "blue"
-              ]
+            "description": "The project that was deleted"
+          }
+        },
+        "summary": "DELETE an existing instance of Result",
+        "tags": [
+          "Results"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of results",
+            "schema": {
+              "$ref": "#/definitions/Result"
             }
           }
         },
-        "summary": "Example endpoint returning a list of colors by palette"
+        "summary": "GET a list of results (or one matching the ID)",
+        "tags": [
+          "Results"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "result",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Result"
+            },
+            "type": "object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result created",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          }
+        },
+        "summary": "PUT a Result",
+        "tags": [
+          "Results"
+        ]
       }
     },
     "/api/task": {
@@ -301,9 +1016,80 @@
         "tags": [
           "Tasks"
         ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitons/Task"
+            },
+            "type": "object"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The task that was created",
+            "schema": {
+              "$ref": "#/definitons/Task"
+            }
+          },
+          "401": {
+            "description": "Access Denied"
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "POST to create a task",
+        "tags": [
+          "Tasks"
+        ]
       }
     },
     "/api/task/{oid}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Task"
+            },
+            "type": "object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The task that was deleted",
+            "schema": {
+              "$ref": "#/definitons/Task"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "DELETE an existing instance of a Task",
+        "tags": [
+          "Tasks"
+        ]
+      },
       "get": {
         "parameters": [
           {
@@ -324,6 +1110,107 @@
         "summary": "GET all tasks",
         "tags": [
           "Tasks"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Task"
+            },
+            "type": "object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The task that was edited",
+            "schema": {
+              "$ref": "#/definitons/Task"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQueryParam": []
+          }
+        ],
+        "summary": "PUT to modify an existing instance of a Task",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/user": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users (or one matching the provided ID)"
+          }
+        },
+        "summary": "GET all users",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/user/{oid}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users (or one matching the provided ID)"
+          }
+        },
+        "summary": "GET all users",
+        "tags": [
+          "Users"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "oid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user that was changed"
+          }
+        },
+        "summary": "Change an existing isntance of a User",
+        "tags": [
+          "Users"
         ]
       }
     }

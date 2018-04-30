@@ -8,12 +8,13 @@ parameters:
   - name: oid
     in: path
     required: true
-  - name: task
-    required: true
-    in: body
-    type: object
-    schema:
-      $ref: '#/definitions/Task'
+requestBody:
+  required: true
+  name: task
+  content:
+    application/json:
+      schema:
+        $ref: '#/definitions/Task'
 responses:
   200:
     description: The task that was edited

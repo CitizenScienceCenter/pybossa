@@ -36,21 +36,19 @@ from pybossa.news import get_news
 from pybossa.messages import *
 
 swagger_base = {
-  "swagger": "2.0",
+  "openapi": "3.0.0",
   "info": {
     "title": "Pybossa API",
     "description": "API for the Pybossa project",
     "contact": {
-      "responsibleOrganization": "Pybossa",
-      "responsibleDeveloper": "Pybossa",
       "email": "support@scifabric.com",
-      "url": "www.pybossa.com",
+      "url": "https://www.pybossa.com",
     },
     "termsOfService": "NOT SET",
     "version": "0.0.1"
   },
   "host": "localhost:5000",  # overrides localhost:500
-  "basePath": "",  # base bash for blueprint registration
+  "basePath": "/",  # base bash for blueprint registration
   "schemes": [
     "http",
     "https"

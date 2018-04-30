@@ -4,13 +4,13 @@ tags:
   - Tasks
 security:
   - APIKeyQueryParam: []
-parameters:
-  - name: task
-    in: body
-    type: object
-    required: true
-    schema:
-      $ref: '#/definitons/Task'
+requestBody:
+  required: true
+  name: task
+  content:
+    application/json:
+      schema:
+        $ref: '#/definitions/Task'
 produces:
   - application/json
 responses:

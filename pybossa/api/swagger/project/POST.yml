@@ -4,13 +4,13 @@ security:
   - APIKeyQueryParam: []
 tags:
   - Projects
-parameters:
-  - name: project
-    in: body
-    type: object
-    required: true
-    schema:
-      $ref: '#/definitions/Project'
+requestBody:
+  required: true
+  name: project
+  content:
+    application/json:
+      schema:
+        $ref: '#/definitions/Project'
 produces:
   - application/json
 responses:
