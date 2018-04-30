@@ -3,18 +3,16 @@ POST to sign in a user
 tags:
   - Users
 parameters:
-  - name: user
-    required: true
-    in: body
-    type: object
-    schema:
-      $ref: '#/definitions/User'
   - name: X-CSRFToken
     required: true
     type: string
     in: header
-produces:
-  - application/json
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/definitions/User'
 responses:
   200:
     description: The user was signed in successfully

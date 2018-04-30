@@ -9,8 +9,6 @@ parameters:
     in: path
     type: integer
     required: false
-produces:
-  - application/json
 responses:
   200:
     description: A list of announcements (or one matching the provided ID)

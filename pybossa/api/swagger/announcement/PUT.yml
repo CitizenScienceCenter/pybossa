@@ -10,7 +10,6 @@ parameters:
     required: true
 requestBody:
   required: true
-  name: announcement
   content:
     application/json:
       schema:
@@ -20,8 +19,6 @@ requestBody:
           "id": 38,
           "title": "T-shirt"
         }
-produces:
-  - application/json
 responses:
   200:
     description: The modified announcement

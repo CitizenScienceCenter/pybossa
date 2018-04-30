@@ -4,7 +4,6 @@ tags:
   - Results
 requestBody:
   required: true
-  name: result
   content:
     application/json:
       schema:

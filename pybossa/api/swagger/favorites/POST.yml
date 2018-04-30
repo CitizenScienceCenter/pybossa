@@ -15,8 +15,6 @@ parameters:
       properties:
         task_id:
           type: integer
-produces:
-  - application/json
 responses:
   200:
     description: The task that was favorited

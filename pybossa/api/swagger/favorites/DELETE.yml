@@ -7,8 +7,6 @@ parameters:
     in: task_id
     type: string
     required: true
-produces:
-  - application/json
 responses:
   200:
     description: The task that was deleted as a favorite

@@ -6,13 +6,10 @@ security:
   - APIKeyQueryParam: []
 requestBody:
   required: true
-  name: task
   content:
     application/json:
       schema:
         $ref: '#/definitions/Task'
-produces:
-  - application/json
 responses:
   200:
     description: The task that was created

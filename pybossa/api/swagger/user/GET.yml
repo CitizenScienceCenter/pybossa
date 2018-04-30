@@ -39,8 +39,6 @@ parameters:
     in: path
     type: integer
     required: false
-produces:
-  - application/json
 responses:
   200:
     description: A list of users (or one matching the provided ID)

@@ -6,13 +6,10 @@ tags:
   - Projects
 requestBody:
   required: true
-  name: project
   content:
     application/json:
       schema:
         $ref: '#/definitions/Project'
-produces:
-  - application/json
 responses:
   200:
     description: The project that was created

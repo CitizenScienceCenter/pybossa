@@ -11,8 +11,6 @@ parameters:
     in: desc
     type: string
     required: false
-produces:
-  - application/json
 responses:
   200:
     description: A list of tasks currently favorited by the user

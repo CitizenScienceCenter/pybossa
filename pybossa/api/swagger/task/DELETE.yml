@@ -34,7 +34,6 @@ parameters:
     required: true
 requestBody:
   required: true
-  name: task
   content:
     application/json:
       schema:

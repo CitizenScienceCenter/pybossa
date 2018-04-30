@@ -9,7 +9,6 @@ parameters:
     type: integer
 requestBody:
   required: true
-  name: project
   content:
     application/json:
       schema:

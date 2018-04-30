@@ -73,7 +73,6 @@ parameters:
     required: true
 requestBody:
   required: true
-  name: project
   content:
     application/json:
       schema:
