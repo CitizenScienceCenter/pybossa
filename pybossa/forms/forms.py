@@ -354,7 +354,7 @@ class RegisterForm(Form):
     err_msg = lazy_gettext("Full name must be between 3 and %(fullname)s "
                            "characters long", fullname=USER_FULLNAME_MAX_LENGTH)
     fullname = TextField(lazy_gettext('Full name'),
-                         [validators.Length(min=3, max=USER_FULLNAME_MAX_LENGTH, message=err_msg)])
+                         [validators.Length(min=0, max=USER_FULLNAME_MAX_LENGTH, message=err_msg)])
 
     err_msg = lazy_gettext("User name must be between 3 and %(username_length)s "
                            "characters long", username_length=USER_NAME_MAX_LENGTH)

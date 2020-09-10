@@ -22,6 +22,7 @@ import json
 import os
 import math
 import requests
+import uuid
 from io import StringIO
 
 from flask import Blueprint, request, url_for, flash, redirect, abort, Response, current_app
@@ -38,6 +39,7 @@ from pybossa.core import (uploader, signer, sentinel, json_exporter,
                           csv_exporter, importer, sentinel, db, anonymizer)
 from pybossa.model import make_uuid
 from pybossa.model.project import Project
+from pybossa.model.comments import Comments
 from pybossa.model.category import Category
 from pybossa.model.task import Task
 from pybossa.model.task_run import TaskRun
@@ -58,18 +60,20 @@ from pybossa.ckan import Ckan
 from pybossa.extensions import misaka
 from pybossa.cookies import CookieHandler
 from pybossa.password_manager import ProjectPasswdManager
-from pybossa.jobs import import_tasks, webhook
+from pybossa.jobs import import_tasks, webhook, send_mail
 from pybossa.forms.projects_view_forms import *
 from pybossa.forms.admin_view_forms import SearchForm
 from pybossa.importers import BulkImportException
 from pybossa.pro_features import ProFeatureHandler
 
-from pybossa.core import (project_repo, user_repo, task_repo, blog_repo,
+from pybossa.core import (project_repo, user_repo, task_repo, blog_repo, comment_repo,
                           result_repo, webhook_repo, auditlog_repo)
 from pybossa.auditlogger import AuditLogger
 from pybossa.contributions_guard import ContributionsGuard
 from pybossa.default_settings import TIMEOUT
 from pybossa.exporter.csv_reports_export import ProjectReportCsvExporter
+
+from pybossa.decorators.check_project_status import project_is_published
 
 blueprint = Blueprint('project', __name__)
 
@@ -80,6 +84,7 @@ importer_queue = Queue('medium',
                        default_timeout=TIMEOUT)
 webhook_queue = Queue('high', connection=sentinel.master)
 
+mail_queue = Queue('email', connection=sentinel.master)
 
 def sanitize_project_owner(project, owner, current_user, ps=None):
     """Sanitize project and owner data."""
@@ -351,7 +356,8 @@ def task_presenter_editor(short_name):
         project_repo.update(db_project)
         msg_1 = gettext('Task presenter added!')
         markup = Markup('<i class="icon-ok"></i> {}')
-        flash(markup.format(msg_1), 'success')
+        #flash(markup.format(msg_1), 'success')
+        flash(msg_1, 'success')
         return redirect_content_type(url_for('.tasks',
                                              short_name=project.short_name))
 
@@ -427,6 +433,44 @@ def task_presenter_editor(short_name):
                     pro_features=pro)
     return handle_content_type(response)
 
+@blueprint.route('/<short_name>/tasks/taskcategory', methods=['POST'])
+@login_required
+def taskcategory(short_name):
+    errors = False
+    project, owner, ps = project_by_shortname(short_name)
+
+    #title = project_title(project, "Task Presenter Editor")
+    ensure_authorized_to('read', project)
+    ensure_authorized_to('update', project)
+
+    pro = pro_features()
+    req_data = request.get_json()
+    form = TaskPresenterForm(request.body)
+    form.id.data = project.id
+
+    if request.method == 'POST' and form.validate():
+        db_project = project_repo.get(project.id)
+        old_project = Project(**db_project.dictize())
+        old_info = dict(db_project.info)
+        old_info['task_category'] =req_data['category']
+        db_project.info = old_info
+        auditlogger.add_log_entry(old_project, db_project, current_user)
+        project_repo.update(db_project)
+        response = dict(
+            flash='Task category added!',
+            status='success')
+
+        return handle_content_type(response)
+
+    if request.method == 'POST' and not form.validate():  # pragma: no cover
+        flash(gettext('Please correct the errors'), 'error')
+        errors = True
+
+    response = dict(
+            flash='Please correct the errors',
+            status='error')
+
+    return handle_content_type(response)
 
 @blueprint.route('/<short_name>/delete', methods=['GET', 'POST'])
 @login_required
@@ -435,7 +479,7 @@ def delete(short_name):
 
     title = project_title(project, "Delete")
     ensure_authorized_to('read', project)
-    ensure_authorized_to('delete', project)
+    ensure_authorized_to('update', project)
     pro = pro_features()
     project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,
                                                                 current_user,
@@ -451,7 +495,12 @@ def delete(short_name):
                         pro_features=pro,
                         csrf=generate_csrf())
         return handle_content_type(response)
-    project_repo.delete(project)
+    #project_repo.delete(project)
+    #we don't want to delete projects. We just unpublish and put them under the dev@citizenscience.ch account.
+    project.published = False
+    project.owner_id = 36
+    project.owners_ids = [36]
+    project_repo.update(project)
     auditlogger.add_log_entry(project, None, current_user)
     flash(gettext('Project deleted!'), 'success')
     return redirect_content_type(url_for('account.profile', name=current_user.name))
@@ -483,8 +532,10 @@ def update(short_name):
 
         if fuzzyboolean(form.protect.data) and form.password.data:
             new_project.set_password(form.password.data)
+            new_project.info['private']=True
         if not fuzzyboolean(form.protect.data):
             new_project.set_password("")
+            new_project.info['private']=False
 
         project_repo.update(new_project)
         auditlogger.add_log_entry(old_project, new_project, current_user)
@@ -787,20 +838,33 @@ def delete_autoimporter(short_name):
 @blueprint.route('/<short_name>/password', methods=['GET', 'POST'])
 def password_required(short_name):
     project, owner, ps = project_by_shortname(short_name)
-    form = PasswordForm(request.form)
-    if request.method == 'POST' and form.validate():
-        password = request.form.get('password')
+    #form = PasswordForm(request.form)
+    if request.method == 'GET':
+        template_args = {"csrf": generate_csrf()}
+        response = dict(template='/projects/password.html', **template_args)
+        return handle_content_type(response)
+
+    #form = PasswordForm(request.form)
+    data=request.get_json()
+    #if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
+        #password = request.form.get('password')
+        password=data['password']
         cookie_exp = current_app.config.get('PASSWD_COOKIE_TIMEOUT')
         passwd_mngr = ProjectPasswdManager(CookieHandler(request, signer, cookie_exp))
         if passwd_mngr.validates(password, project):
-            response = make_response(redirect(request.args.get('next')))
-            return passwd_mngr.update_response(response, project, get_user_id_or_ip())
-        flash(gettext('Sorry, incorrect password'))
-    return render_template('projects/password.html',
-                            project=project,
-                            form=form,
-                            short_name=short_name,
-                            next=request.args.get('next'))
+            data = dict(status='success')
+            return handle_content_type(data)
+            #response = make_response(redirect(request.args.get('next')))
+            #return passwd_mngr.update_response(response, project, get_user_id_or_ip())
+        #flash(gettext('Sorry, incorrect password'))
+        data = dict(status='error')
+        return handle_content_type(data)
+    #return render_template('projects/password.html',
+    #                        project=project,
+    #                        form=form,
+    #                        short_name=short_name,
+    #                        next=request.args.get('next'))
 
 
 @blueprint.route('/<short_name>/task/<int:task_id>')
@@ -1229,12 +1293,14 @@ def show_stats(short_name):
     title = project_title(project, "Statistics")
     pro = pro_features(owner)
 
-    if project.needs_password():
-        redirect_to_password = _check_if_redirect_to_password(project)
-        if redirect_to_password:
-            return redirect_to_password
-    else:
-        ensure_authorized_to('read', project)
+    #if project.needs_password():
+    #    redirect_to_password = _check_if_redirect_to_password(project)
+    #    if redirect_to_password:
+    #        return redirect_to_password
+    #else:
+    #    ensure_authorized_to('read', project)
+
+    ensure_authorized_to('read', project)
 
     project_sanitized, owner_sanitized = sanitize_project_owner(project,
                                                                 owner,
@@ -1606,6 +1672,145 @@ def new_blogpost(short_name):
     return redirect(url_for('.show_blogposts', short_name=short_name))
 
 
+@blueprint.route('/<short_name>/new-comment', methods=['GET', 'POST'])
+@login_required
+def new_comment(short_name):
+    #project, owner, ps = project_by_shortname(short_name)
+    
+    #project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,current_user,ps)
+
+    #pro = pro_features()
+
+    if request.method == 'GET':
+        template_args = {"csrf": generate_csrf()}
+        response = dict(template='/projects/comments.html', **template_args)
+        return handle_content_type(response)
+
+    data=request.get_json()
+    if short_name=='NA':
+        project_id=None
+    else:
+        project, owner, ps = project_by_shortname(short_name)
+        project_id=project.id
+    comment = Comments(owner_id=data['userId'],
+                        project_id=project_id,
+                        parent=data['parentId'],
+                        content=data['content'],
+                        text=data['text'])
+    comment_repo.save(comment)
+    
+    if data['parentId']:
+        comment_topic = comment_repo.get_by(id=data['parentId'])
+        owner_topic = user_repo.get_by(id=comment_topic.owner_id)
+        if comment_topic.owner_id != data['userId']: 
+            topic_obj = comment_topic.content
+            topic = topic_obj['text']
+            reply_obj = data['content']
+            reply = reply_obj['text']
+            msg = dict(subject='Forum notification',recipients=[owner_topic.email_addr])
+            msg['body'] = render_template('/projects/email/forum-notifications.md',data=dict(topic=comment_topic.content['title'],reply=reply))
+            msg['html'] = render_template('/projects/email/forum-notifications.html',data=dict(topic=comment_topic.content['title'],reply=reply))
+            mail_queue.enqueue(send_mail, msg)
+
+    data = dict(status='success',flash='Your comment has been created!')
+
+    return handle_content_type(data)
+
+
+@blueprint.route('/<short_name>/update-comment', methods=['GET', 'POST'])
+@login_required
+def update_comment(short_name):
+
+    if request.method == 'GET':
+        template_args = {"csrf": generate_csrf()}
+        response = dict(template='/projects/comments.html', **template_args)
+        return handle_content_type(response)
+
+    data=request.get_json()
+    if short_name=='NA':
+        project_id=None
+    else:
+        project, owner, ps = project_by_shortname(short_name)
+        project_id=project.id
+
+    comment = Comments(id=data['id'],project_id=project_id,
+                       parent=data['parentId'],
+                       content=data['content'])
+    comment_repo.update(comment)
+
+    data = dict(status='success',flash='Your comment has been updated!')
+
+    return handle_content_type(data)
+
+@blueprint.route('/<short_name>/get-comment',methods=['GET'])
+#@login_required
+def get_comment(short_name):
+    project, owner, ps = project_by_shortname(short_name)
+    #project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,current_user,ps)
+
+    comments = cached_projects.n_comments(project.id)
+    #comments = comment_repo.get_by_project_id(project.id)
+    data = dict(status='success',data=comments)
+    return handle_content_type(data)
+
+@blueprint.route('/forum/threads',methods=['GET'])
+#@login_required
+def get_threads():
+    limit = request.args.get('limit')
+    offset = request.args.get('offset')
+    #orderby = request.args.get('desc')
+
+    #threads = comment_repo.get_by_parent_id(None)
+    #join_data = comment_repo.get_threads_user(None)
+    #join = [jn.dictize() for jn in join_data]
+    number_of_threads = comment_repo.count_comments_with_parent_id(None)
+    #threads = comment_repo.filter_by(limit=limit,offset=offset,desc=True,parent=None)
+    #threads_data = [tr.dictize() for tr in threads]
+    threads_data = cached_projects.n_threads(None)
+    #comments = cached_projects.n_comments(project.id)
+    #comments = comment_repo.get_by_project_id(project.id)
+    data = dict(status='success',data=threads_data,count=number_of_threads)
+    return handle_content_type(data)
+
+@blueprint.route('/forum/thread/<id>/comments',methods=['GET'])
+#@login_required
+def get_replies(id):
+    limit = request.args.get('limit')
+    offset = request.args.get('offset')
+    #orderby = request.args.get('desc')
+
+    #threads = comment_repo.get_by_parent_id(None)
+    number_of_threads = comment_repo.count_comments_with_parent_id(id)
+    #thread_comments = comment_repo.filter_by(limit=limit,offset=offset,desc=True,parent=id)
+    #threads_data = [tr.dictize() for tr in thread_comments]
+    replies = cached_projects.n_replies(id)
+    #comments = comment_repo.get_by_project_id(project.id)
+    data = dict(status='success',data=replies,count=number_of_threads)
+    return handle_content_type(data)
+
+
+@blueprint.route('/forum/comment/<int:comment_id>/delete', methods=['GET','POST'])
+@login_required
+def delete_comment(comment_id):
+    if request.method == 'GET':
+        template_args = {"csrf": generate_csrf()}
+        response = dict(template='/projects/comments.html', **template_args)
+        return handle_content_type(response)
+
+    comment = comment_repo.get_by(id=comment_id)
+    if comment is None:
+        raise abort(404)
+
+    #ensure_authorized_to('delete', comment)
+    if comment.owner_id == current_user.id or current_user.admin:
+        comment_repo.delete(comment)
+        comment_repo.delete_topic_replies(comment)
+        data = dict(status='success')
+    else:
+        data = dict(status='error',message='You do not have permission to delete it.')
+    return handle_content_type(data)
+
+
 @blueprint.route('/<short_name>/<int:id>/update', methods=['GET', 'POST'])
 @login_required
 def update_blogpost(short_name, id):
@@ -1702,6 +1907,7 @@ def auditlog(short_name):
 
 @blueprint.route('/<short_name>/publish', methods=['GET', 'POST'])
 @login_required
+#@project_is_published
 def publish(short_name):
 
     project, owner, ps = project_by_shortname(short_name)
@@ -1719,16 +1925,88 @@ def publish(short_name):
 
     if project.published is False:
         project.published = True
+        project.info['pending_approval'] = False
+        project.info['shareable_key'] = None
+        project.info['shareable_link'] = None
         project_repo.save(project)
         task_repo.delete_taskruns_from_project(project)
         result_repo.delete_results_from_project(project)
         webhook_repo.delete_entries_from_project(project)
         auditlogger.log_event(project, current_user,
                               'update', 'published', False, True)
-        flash(gettext('Project published! Volunteers will now be able to help you!'))
+        #flash(gettext('Project published! Volunteers will now be able to help you!'))
     else:
         flash(gettext('Project already published'))
+        #print('project already published')
+        
     return redirect(url_for('.details', short_name=project.short_name))
+
+@blueprint.route('/<short_name>/approve', methods=['GET', 'POST'])
+@login_required
+def approve(short_name):
+
+    project, owner, ps = project_by_shortname(short_name)
+    project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,
+                                                                current_user,
+                                                                ps)
+    pro = pro_features()
+    #ensure_authorized_to('publish', project)
+    if request.method == 'GET':
+        template_args = {"project": project_sanitized,
+                         "pro_features": pro,
+                         "csrf": generate_csrf()}
+        response = dict(template='/projects/approval.html', **template_args)
+        return handle_content_type(response)
+    #ensure_authorized_to('publish', project)
+
+    #send email notification
+
+    if 'pending_approval' not in project.info:
+        #print('Pending approval doesnt exist.. adding field to info')
+        
+        project.info['pending_approval'] = True
+        project_repo.save(project)    
+        user = user_repo.get_by_name(current_user.name)
+
+        platform_url = current_app.config.get('PLATFORM_URL')
+        lab_url = current_app.config.get('LAB_URL')
+        mail_recipients = current_app.config.get('INFO_RECIEPIENTS')
+
+        project_url_pybossa = platform_url+'/project/'+project.short_name+'/publish'
+        project_url_lab = lab_url+'/project/'+str(project.id)
+
+        msg = dict(subject='Project approval',
+                       recipients=[mail_recipients]) #change here to c3s admin
+
+        msg['body'] = render_template(
+                    '/projects/email/project_approval.md',
+                    user=user, 
+                    #project_url_a=project_url_pybossa,
+                    project_url_b=project_url_lab
+                    )
+        msg['html'] = render_template(
+                    '/projects/email/project_approval.html',
+                    user=user, 
+                    #project_url_a=project_url_pybossa,
+                    project_url_b=project_url_lab,
+                    )
+        
+        #send_mail(msg)
+        mail_queue.enqueue(send_mail, msg)
+        #flash(gettext('Project in approval list!Our administrators will contact you in case we have questions! Thank you!))
+        data = dict(title=gettext("Project approval"),
+                    status='success',
+                    flash='Thank you! Our administrators will contact you in case of questions!')
+        
+    else:
+        #flash(gettext('Project already in approval list'))
+        #user = user_repo.get_by_name(current_user.name)
+        data = dict(title=gettext("Project approval"),
+                    status='error',
+                    flash='We have found your project in our approval list!')
+
+    #return redirect(url_for('.details', short_name=project.short_name))
+    return handle_content_type(data)
 
 
 def project_event_stream(short_name, channel_type):
@@ -1739,6 +2017,40 @@ def project_event_stream(short_name, channel_type):
     for message in pubsub.listen():
         yield 'data: %s\n\n' % message['data']
 
+
+@blueprint.route('/<short_name>/link', methods=['GET', 'POST'])
+@login_required
+def link(short_name):
+    project, owner, ps = project_by_shortname(short_name)
+    #project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,current_user,ps)
+    ensure_authorized_to('read', project)
+
+    if request.method == 'GET':
+        key = uuid.uuid1()
+        lab_url = current_app.config.get('LAB_URL')
+        share_url = lab_url+'/project/'+short_name+'/test/confirm?share='+str(key)
+        project.info['shareable_key'] = str(key)
+        project.info['shareable_link'] = str(share_url)
+        project_repo.save(project)
+        response=dict(key=share_url)
+        return handle_content_type(response)
+
+@blueprint.route('/<short_name>/test/confirm', methods=['GET'])
+def confirm(short_name):
+    project, owner, ps = project_by_shortname(short_name)
+    project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,current_user,ps)
+    key = request.args.get('share')
+    
+    if key is None:
+        abort(403)
+
+    sharedKey = project.info['shareable_key']
+    if key != sharedKey:
+        abort(403)
+
+    response = dict(status='success',project=project_sanitized)
+    return handle_content_type(response)
+        
 
 @blueprint.route('/<short_name>/privatestream')
 @login_required
@@ -2076,3 +2388,22 @@ def export_project_report(short_name):
             ensure_authorized_to('read', project)
 
     return {'csv': respond_csv}[fmt](ty)
+
+
+
+@blueprint.route('/<int:id>/private')
+def is_private(id):
+    """Check if project is private"""
+    project = project_repo.get(id)
+    #project, owner, ps = project_by_shortname(short_name)
+
+    if project.needs_password():
+        redirect_to_password = _check_if_redirect_to_password(project)
+        if redirect_to_password:
+            response = dict(message='redirect to password',redirect=True,private=True)
+        else:
+            response = dict(message='do not redirect',redirect=False, private=True)
+    else:
+        response = dict(private=False)
+
+    return handle_content_type(response)

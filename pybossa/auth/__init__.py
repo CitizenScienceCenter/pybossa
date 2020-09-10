@@ -19,7 +19,7 @@
 import inspect
 from flask import abort
 from flask_login import current_user
-from pybossa.core import announcement_repo, task_repo, project_repo, result_repo
+from pybossa.core import announcement_repo, task_repo, project_repo, result_repo, comment_repo
 from pybossa.core import project_stats_repo
 from pybossa.auth.errcodes import *
 
@@ -41,6 +41,7 @@ from . import webhook
 from . import result
 from . import helpingmaterial
 from . import page
+from . import comments
 
 assert project
 assert projectstats
@@ -55,6 +56,7 @@ assert auditlog
 assert webhook
 assert result
 assert page
+assert comments
 
 
 _actions = ['create', 'read', 'update', 'delete']
@@ -64,6 +66,8 @@ _auth_classes = {'project': project.ProjectAuth,
                  'announcement': announcement.AnnouncementAuth,
                  'blogpost': blogpost.BlogpostAuth,
                  'category': category.CategoryAuth,
+                 'comment': comments.CommentsAuth,
+                 'page': page.PageAuth,
                  'task': task.TaskAuth,
                  'taskrun': taskrun.TaskRunAuth,
                  'token': token.TokenAuth,
@@ -99,6 +103,7 @@ def ensure_authorized_to(action, resource, **kwargs):
 
 def _authorizer_for(resource_name):
     kwargs = {}
+    print(resource_name)
     if resource_name in ('project', 'taskrun'):
         kwargs.update({'task_repo': task_repo})
     if resource_name in ('auditlog', 'blogpost', 'task',
@@ -107,8 +112,9 @@ def _authorizer_for(resource_name):
         kwargs.update({'project_repo': project_repo})
     if resource_name in ('project', 'task', 'taskrun'):
         kwargs.update({'result_repo': result_repo})
+    if resource_name in ('comment'):
+        kwargs.update({'comment_repo': comment_repo})
     return _auth_classes[resource_name](**kwargs)
-
 
 def handle_error(error):
     """Return authentication error in JSON."""

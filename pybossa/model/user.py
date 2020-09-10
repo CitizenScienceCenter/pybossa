@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with PYBOSSA.  If not, see <http://www.gnu.org/licenses/>.
 
-from sqlalchemy import Integer, Boolean, Unicode, Text, String, BigInteger, Date
+from sqlalchemy import Integer, Boolean, Unicode, Text, String, BigInteger
 from sqlalchemy.schema import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
@@ -43,7 +43,7 @@ class User(db.Model, DomainObject, UserMixin):
     #: Name of the user (this is used as the nickname).
     name = Column(Unicode(length=254), unique=True, nullable=False)
     #: Fullname of the user.
-    fullname = Column(Unicode(length=500), nullable=False)
+    fullname = Column(Unicode(length=500), nullable=True)
     #: Language used by the user in the PYBOSSA server.
     locale = Column(Unicode(length=254), default='en', nullable=False)
     api_key = Column(String(length=36), default=make_uuid, unique=True)
@@ -63,10 +63,10 @@ class User(db.Model, DomainObject, UserMixin):
     valid_email = Column(Boolean, default=False)
     confirmation_email_sent = Column(Boolean, default=False)
     subscribed = Column(Boolean, default=False)
+    #gtag = Column(Boolean, default=True)
     consent = Column(Boolean, default=False)
     info = Column(MutableDict.as_mutable(JSONB), default=dict())
     user_pref = Column(JSONB)
-    notified_at = Column(Date, default=None)
 
     ## Relationships
     task_runs = relationship(TaskRun, backref='user')

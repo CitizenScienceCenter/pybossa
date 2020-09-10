@@ -18,7 +18,7 @@
 """Cache module for users."""
 from sqlalchemy.sql import text
 from sqlalchemy.exc import ProgrammingError
-from pybossa.core import db, timeouts
+from pybossa.core import db, timeouts,comment_repo
 from pybossa.cache import cache, memoize, delete_memoized
 from pybossa.util import pretty_date, exists_materialized_view
 from pybossa.model.user import User
@@ -41,7 +41,7 @@ def get_leaderboard(n, user_id=None, window=0, info=None):
         return gl(top_users=n, user_id=user_id, window=window, info=info)
 
 
-@memoize(timeout=timeouts.get('USER_TIMEOUT'))
+#@memoize(timeout=timeouts.get('USER_TIMEOUT'))
 def get_user_summary(name, current_user=None):
     """Return user summary."""
     sql = text('''
@@ -59,6 +59,7 @@ def get_user_summary(name, current_user=None):
                ''')
     results = session.execute(sql, dict(name=name))
     user = dict()
+    print('getting profile user smmatyy')
     for row in results:
         user = dict(id=row.id, name=row.name, fullname=row.fullname,
                     created=row.created, api_key=row.api_key,
@@ -67,6 +68,7 @@ def get_user_summary(name, current_user=None):
                     facebook_user_id=row.facebook_user_id,
                     info=row.info, admin=row.admin,
                     locale=row.locale,
+                    #gtag=row.consent,
                     email_addr=row.email_addr, n_answers=row.n_answers,
                     valid_email=row.valid_email,
                     confirmation_email_sent=row.confirmation_email_sent,
@@ -74,6 +76,7 @@ def get_user_summary(name, current_user=None):
                     registered_ago=pretty_date(row.created))
     if user:
         rank_score = rank_and_score(user['id'])
+        user['forum_updates'] = get_forum_updates_val(user['info'])
         user['rank'] = rank_score['rank']
         user['score'] = rank_score['score']
         user['total'] = get_total_users()
@@ -89,6 +92,27 @@ def get_user_summary(name, current_user=None):
     else:  # pragma: no cover
         return None
 
+#@memoize(timeout=timeouts.get('USER_TIMEOUT'))
+def get_forum_updates_val(info):
+    """Sanitize user summary for public usage"""
+    number_of_threads = comment_repo.count_comments_with_parent_id(None)
+    if 'forum_info' in info:
+        forum = info['forum_info']
+        if number_of_threads > forum['topics']:
+            updates = True
+            #new_topics = number_of_threads - forum['topics']
+        else:
+            updates = False
+            #new_topics = 0
+    else:
+        if number_of_threads > 0:
+            updates = True
+            #new_topics = number_of_threads
+        else:
+            updates = False
+            #new_topics = 0
+    #data = dict(updates=updates,new_topics=new_topics)
+    return updates
 
 @memoize(timeout=timeouts.get('USER_TIMEOUT'))
 def public_get_user_summary(name):

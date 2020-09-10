@@ -148,7 +148,10 @@ def redirect_content_type(url, status=None):
 
 def url_for_app_type(endpoint, _hash_last_flash=False, **values):
     """Generate a URL for an SPA, or otherwise."""
-    spa_server_name = current_app.config.get('SPA_SERVER_NAME')
+    
+    spa_server_name = current_app.config.get('LAB_URL')
+    #spa_server_name = current_app.config.get('SPA_SERVER_NAME')
+
     if spa_server_name:
         values.pop('_external', None)
         values.pop('_scheme', None)
@@ -347,7 +350,7 @@ def with_cache_disabled(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         env_cache_disabled = os.environ.get('PYBOSSA_REDIS_CACHE_DISABLED')
-        if env_cache_disabled is None or env_cache_disabled == '0':
+        if env_cache_disabled is None or env_cache_disabled is '0':
             os.environ['PYBOSSA_REDIS_CACHE_DISABLED'] = '1'
         return_value = f(*args, **kwargs)
         if env_cache_disabled is None:

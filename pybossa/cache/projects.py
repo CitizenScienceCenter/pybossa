@@ -229,6 +229,32 @@ def n_blogposts(project_id):
         n_blogposts = row.ct
     return n_blogposts
 
+def n_threads(project_id):
+    sql = text('''
+               SELECT com.id as id,com.owner_id as owner_id, com.created as created, com.parent as parent, com.content as content, com.text as text, u.name as username, u.info->>'avatar_url' as avatar_url from comments as com
+               INNER JOIN public.user u ON com.owner_id=u.id
+               WHERE parent IS NULL  order by created desc;
+               ''')
+    results = session.execute(sql, dict(parent=project_id))
+    comments = []
+    for row in results:
+        comment = dict(id=row.id, owner_id=row.owner_id, created=row.created,parent=row.parent,content=row.content, text=row.text, username=row.username, avatar_url=row.avatar_url)
+        comments.append(comment)
+    return comments
+
+#WHERE parent=:id  order by created desc;
+def n_replies(project_id):
+    sql = text('''
+               SELECT com.id as id, com.owner_id as owner_id, com.created as created, com.parent as parent, com.content as content, com.text as text, u.name as username, u.info->>'avatar_url' as avatar_url from comments as com
+               INNER JOIN public.user u ON com.owner_id=u.id
+               where parent=:parent order by created desc;''')
+    results = session.execute(sql, dict(parent=project_id))
+    comments = []
+    for row in results:
+        comment = dict(id=row.id,owner_id=row.owner_id, created=row.created,parent=row.parent,content=row.content, text=row.text, username=row.username, avatar_url=row.avatar_url)
+        comments.append(comment)
+    return comments
+
 
 # This function does not change too much, so cache it for a longer time
 @cache(timeout=timeouts.get('STATS_FRONTPAGE_TIMEOUT'),
@@ -260,6 +286,9 @@ def get_all_featured(category=None):
     results = session.execute(sql)
     projects = []
     for row in results:
+        private = False
+        if row.info['passwd_hash']:
+            private = True
         project = dict(id=row.id, name=row.name, short_name=row.short_name,
                        created=row.created, description=row.description,
                        updated=row.updated,
@@ -269,7 +298,8 @@ def get_all_featured(category=None):
                        overall_progress=overall_progress(row.id),
                        n_tasks=n_tasks(row.id),
                        n_volunteers=n_volunteers(row.id),
-                       info=row.info)
+                       info=row.info,
+                       restricted=private)
         projects.append(Project().to_public_json(project))
     return projects
 
@@ -355,11 +385,10 @@ def n_count(category):
                WHERE
                category.short_name=:category
                AND project.published=true
-               AND (project.info->>'passwd_hash') IS NULL
                GROUP BY project.id)
                SELECT COUNT(*) FROM uniq
                ''')
-
+    #AND (project.info->>'passwd_hash') IS NULL
     results = session.execute(sql, dict(category=category))
     count = 0
     for row in results:
@@ -382,12 +411,15 @@ def get_all(category):
            AND "user".id=project.owner_id
            AND "user".restrict=false
            AND project.published=true
-           AND (project.info->>'passwd_hash') IS NULL
            GROUP BY project.id, "user".id ORDER BY project.name;''')
 
+    #AND (project.info->>'passwd_hash') IS NULL
     results = session.execute(sql, dict(category=category))
     projects = []
     for row in results:
+        private = False
+        if 'passwd_hash' in row.info and row.info['passwd_hash']:
+            private = True
         project = dict(id=row.id,
                        name=row.name, short_name=row.short_name,
                        created=row.created,
@@ -400,7 +432,7 @@ def get_all(category):
                        overall_progress=overall_progress(row.id),
                        n_tasks=n_tasks(row.id),
                        n_volunteers=n_volunteers(row.id),
-                       info=row.info)
+                       info=row.info, restricted=private)
         projects.append(Project().to_public_json(project))
     return projects
 
