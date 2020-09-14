@@ -203,6 +203,7 @@ def setup_repositories(app):
     from pybossa.repositories import ResultRepository
     from pybossa.repositories import HelpingMaterialRepository
     from pybossa.repositories import PageRepository
+    from pybossa.repositories import CommentRepository
     global user_repo
     global project_repo
     global project_stats_repo
@@ -214,6 +215,7 @@ def setup_repositories(app):
     global result_repo
     global helping_repo
     global page_repo
+    global comment_repo
     language = app.config.get('FULLTEXTSEARCH_LANGUAGE')
     user_repo = UserRepository(db)
     project_repo = ProjectRepository(db)
@@ -226,6 +228,7 @@ def setup_repositories(app):
     result_repo = ResultRepository(db)
     helping_repo = HelpingMaterialRepository(db)
     page_repo = PageRepository(db)
+    comment_repo = CommentRepository(db)
 
 
 def setup_error_email(app):
