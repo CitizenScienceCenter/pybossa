@@ -287,7 +287,7 @@ def get_all_featured(category=None):
     projects = []
     for row in results:
         private = False
-        if row.info['passwd_hash']:
+        if 'passwd_hash' in row.info and row.info['passwd_hash']:
             private = True
         project = dict(id=row.id, name=row.name, short_name=row.short_name,
                        created=row.created, description=row.description,
