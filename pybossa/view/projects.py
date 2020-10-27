@@ -1934,12 +1934,15 @@ def publish(short_name):
         webhook_repo.delete_entries_from_project(project)
         auditlogger.log_event(project, current_user,
                               'update', 'published', False, True)
+        data = dict(title=gettext("Project published"),
+                    status='success')
         #flash(gettext('Project published! Volunteers will now be able to help you!'))
     else:
-        flash(gettext('Project already published'))
-        #print('project already published')
-        
-    return redirect(url_for('.details', short_name=project.short_name))
+        #flash(gettext('Project already published'))
+        data = dict(title=gettext("Project already published"),
+                    status='error')
+    #return redirect(url_for('.details', short_name=project.short_name))
+    return handle_content_type(data)
 
 @blueprint.route('/<short_name>/approve', methods=['GET', 'POST'])
 @login_required
