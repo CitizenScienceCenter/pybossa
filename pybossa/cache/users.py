@@ -94,25 +94,25 @@ def get_user_summary(name, current_user=None):
 
 #@memoize(timeout=timeouts.get('USER_TIMEOUT'))
 def get_forum_updates_val(info):
-    """Sanitize user summary for public usage"""
+    """Returns the number of new topics"""
     number_of_threads = comment_repo.count_comments_with_parent_id(None)
     if 'forum_info' in info:
         forum = info['forum_info']
         if number_of_threads > forum['topics']:
             updates = True
-            #new_topics = number_of_threads - forum['topics']
+            new_topics = number_of_threads - forum['topics']
         else:
             updates = False
-            #new_topics = 0
+            new_topics = 0
     else:
         if number_of_threads > 0:
             updates = True
-            #new_topics = number_of_threads
+            new_topics = number_of_threads
         else:
             updates = False
-            #new_topics = 0
-    #data = dict(updates=updates,new_topics=new_topics)
-    return updates
+            new_topics = 0
+    data = dict(updates=updates,new_topics=new_topics)
+    return data
 
 @memoize(timeout=timeouts.get('USER_TIMEOUT'))
 def public_get_user_summary(name):
