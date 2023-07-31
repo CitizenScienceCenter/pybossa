@@ -188,16 +188,8 @@ def _retrieve_new_task(project_id):
         desc = False
 
     user_id = None if current_user.is_anonymous else current_user.id
-    
-    print("\n *****Jan remote address***** \n")
-    print(request.remote_addr)
-    
     user_ip = (anonymizer.ip(request.remote_addr or '127.0.0.1')
                if current_user.is_anonymous else None)
-    
-    print("\n *****Jan anonymous address***** \n")
-    print(user_ip)
-               
     external_uid = request.args.get('external_uid')
     task = sched.new_task(project_id, project.info.get('sched'),
                           user_id,

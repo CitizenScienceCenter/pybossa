@@ -25,24 +25,25 @@ from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 class Comments(db.Model, DomainObject):
+    '''A Counter lists the number of task runs for a given Task.'''
 
-    __tablename__ = 'comments' 
+    __tablename__ = 'comments'
 
-    #: Comment.ID
+    #: Counter.ID
     id = Column(Integer, primary_key=True)
-    #: UTC timestamp when the comment was created.
+    #: UTC timestamp when the counter was created.
     created = Column(TIMESTAMP, default=make_timestamp)
-    #: UTC timestamp when the comment was updated.
+    #: UTC timestamp when the counter was created.
     updated = Column(TIMESTAMP, default=make_timestamp)
-    #: Comment owner_id
+    #: Project owner_id
     owner_id = Column(Integer, ForeignKey('user.id'))
-    #: Project.ID that this comment is associated with.
+    #: Project.ID that this counter is associated with.
     project_id = Column(Integer, ForeignKey('project.id'))
-    #: parent ID - Separates topic from comments. Null for topics, Topic id for replies
+    #: parent ID
     parent = Column(Integer)
     #: content
     content = Column(MutableDict.as_mutable(JSONB), default=dict())
     #: text
     text = Column(Text)
-    #: Comment info field formatted as JSON
+    #: Project info field formatted as JSON
     info = Column(MutableDict.as_mutable(JSONB), default=dict())

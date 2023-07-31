@@ -54,6 +54,7 @@ def create_app(run_as_server=True):
     setup_repositories(app)
     setup_exporter(app)
     setup_strong_password(app)
+    
     mail.init_app(app)
     sentinel.init_app(app)
     signer.init_app(app)
@@ -230,7 +231,6 @@ def setup_repositories(app):
     page_repo = PageRepository(db)
     comment_repo = CommentRepository(db)
 
-
 def setup_error_email(app):
     """Setup error email."""
     from logging.handlers import SMTPHandler
@@ -277,23 +277,23 @@ def setup_babel(app):
     """Return babel handler."""
     babel.init_app(app)
 
-    #@babel.localeselector
-    #def _get_locale():
-        #from flask import request
-        #locales = [l[0] for l in app.config.get('LOCALES')]
-        #if current_user.is_authenticated:
-        #   lang = current_user.locale
-        #else:
-        #    lang = request.cookies.get('language')
-        #if (lang is None or lang == '' or
-        #        lang.lower() not in locales):
-        #    lang = request.accept_languages.best_match(locales)
-        #if (lang is None or lang == '' or
-        #        lang.lower() not in locales):
-        #    lang = app.config.get('DEFAULT_LOCALE') or 'en'
-        #if request.headers.get('Content-Type') == 'application/json':
-        #    lang = 'en'
-        #return lang.lower()
+    @babel.localeselector
+    def _get_locale():
+        from flask import request
+        locales = [l[0] for l in app.config.get('LOCALES')]
+        if current_user.is_authenticated:
+           lang = current_user.locale
+        else:
+            lang = request.cookies.get('language')
+        if (lang is None or lang == '' or
+                lang.lower() not in locales):
+            lang = request.accept_languages.best_match(locales)
+        if (lang is None or lang == '' or
+                lang.lower() not in locales):
+            lang = app.config.get('DEFAULT_LOCALE') or 'en'
+        if request.headers.get('Content-Type') == 'application/json':
+            lang = 'en'
+        return lang.lower()
     return babel
 
 
@@ -523,6 +523,7 @@ def setup_error_handlers(app):
 
 
 def setup_hooks(app):
+    print(app.config)
     """Setup hooks."""
     @app.after_request
     def _inject_x_rate_headers(response):

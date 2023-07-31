@@ -9,5 +9,5 @@ def project_is_published(f):
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         return 'checking project publish status'
-
+    
     return decorated_function
