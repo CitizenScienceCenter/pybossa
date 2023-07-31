@@ -1,0 +1,247 @@
+# -*- coding: utf8 -*-
+# This file is part of PyBossa.
+#
+# Copyright (C) 2013 SF Isle of Man Limited
+#
+# PyBossa is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PyBossa is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with PyBossa.  If not, see <http://www.gnu.org/licenses/>.
+
+DEBUG = True
+
+## webserver host and port
+#PORT = 8080
+
+PLATFORM_URL = 'https://pb.citizenscience.ch'
+LAB_URL='https://lab.citizenscience.ch'
+PREFERRED_URL_SCHEME='https'
+INFO_RECIEPIENTS = 'lab@citizenscience.ch'
+
+WTF_CSRF_ENABLED = False
+WTF_CSRF_SSL_STRICT = False
+CSRF_ENABLED = False
+
+# DEBUG = False
+
+## host for local development
+# HOST = '0.0.0.0'
+
+# anonymize the ip addresses
+CRYPTOPAN_KEY = 'BT5DOVi4Ejo9Q6uA4N5T8h4WqYKaL6BX'
+
+## use SERVER_NAME instead of HOST for production environment with real URLs
+SERVER_NAME = 'pb.citizenscience.ch'
+PORT = 80
+
+# TODO: set these to something else
+SECRET = '{{PYBOSSA_SECRET}}'
+SECRET_KEY = '{{PYBOSSA_SECRET_KEY}}'
+
+SQLALCHEMY_DATABASE_URI = '{{POSTGRES_URL}}'
+
+##Slave configuration for DB
+#SQLALCHEMY_BINDS = {
+#    'slave': 'postgresql://user:password@server/db'
+#}
+
+# TODO: set this to something else
+ITSDANGEROUSKEY = 'its-dangerous-key'
+
+## project configuration
+BRAND = 'PyBossa'
+TITLE = 'PyBossa'
+LOGO = 'default_logo.svg'
+COPYRIGHT = 'Set Your Institution'
+DESCRIPTION = 'Set the description in your config'
+TERMSOFUSE = 'http://okfn.org/terms-of-use/'
+DATAUSE = 'http://opendatacommons.org/licenses/by/'
+CONTACT_EMAIL = 'info@pybossa.com'
+CONTACT_TWITTER = 'PyBossa'
+
+## Default number of projects per page
+## APPS_PER_PAGE = 20
+
+## External Auth providers
+# TWITTER_CONSUMER_KEY=''
+# TWITTER_CONSUMER_SECRET=''
+# FACEBOOK_APP_ID=''
+# FACEBOOK_APP_SECRET=''
+# GOOGLE_CLIENT_ID=''
+# GOOGLE_CLIENT_SECRET=''
+
+## Supported Languages
+## NOTE: You need to create a symbolic link to the translations folder, otherwise
+## this wont work.
+## ln -s pybossa/themes/your-theme/translations pybossa/translations
+#DEFAULT_LOCALE = 'en'
+#LOCALES = [('en', 'English'), ('es', u'Español'),
+#           ('it', 'Italiano'), ('fr', u'Français'),
+#           ('ja', u'日本語'),('pt_BR','Brazilian Portuguese')]
+
+
+## list of administrator emails to which error emails get sent
+# ADMINS = ['me@sysadmin.org']
+
+## CKAN URL for API calls
+#CKAN_NAME = "Demo CKAN server"
+#CKAN_URL = "http://demo.ckan.org"
+
+
+## logging config
+# Sentry configuration
+# SENTRY_DSN=''
+## set path to enable
+# LOG_FILE = '/path/to/log/file'
+## Optional log level
+# import logging
+# LOG_LEVEL = logging.DEBUG
+
+## Mail setup
+#MAIL_SERVER = '{{PYBOSSA_MAIL_SERVER}}'
+#MAIL_USERNAME = {{PYBOSSA_MAIL_USERNAME}}
+#MAIL_PASSWORD = {{PYBOSSA_MAIL_PASSWORD}}
+#MAIL_PORT = {{PYBOSSA_MAIL_PORT}}
+#MAIL_FAIL_SILENTLY = {{PYBOSSA_MAIL_FAIL_SILENTLY}}
+#MAIL_DEFAULT_SENDER = "{{PYBOSSA_MAIL_DEFAULT_SENDER}}"
+
+## Mail setup
+MAIL_DEFAULT_SENDER='C3S Project Builder<no-reply@citizenscience.ch>'
+MAIL_SERVER='asmtp.mailstation.ch'
+MAIL_PORT=587
+#MAIL_USE_SSL=True
+MAIL_USERNAME = 'no-reply@citizenscience.ch'
+MAIL_PASSWORD = 'L6Ahfb3C'
+
+## Announcement messages
+## Use any combination of the next type of messages: root, user, and app owners
+## ANNOUNCEMENT = {'admin': 'Root Message', 'user': 'User Message', 'owner': 'Owner Message'}
+
+## Enforce Privacy Mode, by default is disabled
+## This config variable will disable all related user pages except for admins
+## Stats, top users, leaderboard, etc
+ENFORCE_PRIVACY = False
+
+
+## Cache setup. By default it is enabled
+## Redis Sentinel
+# List of Sentinel servers (IP, port)
+#PYBOSSA_REDIS_CACHE_DISABLED='1'
+REDIS_HOST = 'redis-master'
+REDIS_CACHE_ENABLED = True
+REDIS_SENTINEL = [('{{REDIS_SENTINEL}}', 26379)]
+REDIS_MASTER = 'redismaster'
+REDIS_DB = {{REDIS_DB}}
+REDIS_SOCKET_TIMEOUT = None
+REDIS_RETRY_ON_TIMEOUT = True
+REDIS_KEYPREFIX = 'pybossa_cache'
+RQ_DASHBOARD_REDIS_MASTER = '{{REDIS_MASTER}}'
+RQ_DASHBOARD_REDIS_DB = {{REDIS_DB}}
+RQ_DASHBOARD_REDIS_SENTINELS='{{REDIS_SENTINELS}}'
+# Uncomment this for rq_dashboard>=1.0
+RQ_DASHBOARD_REDIS_URL="redis+sentinel://{{REDIS_SENTINELS}}/{{REDIS_MASTER}}/{{REDIS_DB}}"
+
+## Allowed upload extensions
+ALLOWED_EXTENSIONS = ['js', 'css', 'png', 'jpg', 'jpeg', 'gif', 'zip']
+
+## If you want to use the local uploader configure which folder
+UPLOAD_METHOD = 'local'
+UPLOAD_FOLDER = 'uploads'
+
+## If you want to use Rackspace for uploads, configure it here
+# RACKSPACE_USERNAME = 'username'
+# RACKSPACE_API_KEY = 'apikey'
+# RACKSPACE_REGION = 'ORD'
+
+## Default number of users shown in the leaderboard
+# LEADERBOARD = 20
+## Default shown presenters
+# PRESENTERS = ["basic", "image", "sound", "video", "map", "pdf"]
+# Default Google Docs spreadsheet template tasks URLs
+TEMPLATE_TASKS = {
+    'image': "https://docs.google.com/spreadsheet/ccc?key=0AsNlt0WgPAHwdHFEN29mZUF0czJWMUhIejF6dWZXdkE&usp=sharing",
+    'sound': "https://docs.google.com/spreadsheet/ccc?key=0AsNlt0WgPAHwdEczcWduOXRUb1JUc1VGMmJtc2xXaXc&usp=sharing",
+    'video': "https://docs.google.com/spreadsheet/ccc?key=0AsNlt0WgPAHwdGZ2UGhxSTJjQl9YNVhfUVhGRUdoRWc&usp=sharing",
+    'map': "https://docs.google.com/spreadsheet/ccc?key=0AsNlt0WgPAHwdGZnbjdwcnhKRVNlN1dGXy0tTnNWWXc&usp=sharing",
+    'pdf': "https://docs.google.com/spreadsheet/ccc?key=0AsNlt0WgPAHwdEVVamc0R0hrcjlGdXRaUXlqRXlJMEE&usp=sharing"}
+
+# Expiration time for password protected project cookies
+PASSWD_COOKIE_TIMEOUT = 60 * 30
+
+# Expiration time for account confirmation / password recovery links
+ACCOUNT_LINK_EXPIRATION = 5 * 60 * 60
+
+## Ratelimit configuration
+# LIMIT = 300
+# PER = 15 * 60
+
+# Disable new account confirmation (via email)
+ACCOUNT_CONFIRMATION_DISABLED = True
+
+# Mailchimp API key
+# MAILCHIMP_API_KEY = "your-key"
+# MAILCHIMP_LIST_ID = "your-list-ID"
+
+# Flickr API key and secret
+FLICKR_API_KEY = 'f508c1563035cdccfd15f8303150dd6a'
+FLICKR_SHARED_SECRET = '5cbd662ffbf56c97'
+
+# Dropbox app key
+DROPBOX_APP_KEY = 'pr913crgkexql03'
+
+TWITTER_CONSUMER_KEY='TaXNjhH6Rqz5iP6MkNf6aJFnk'
+TWITTER_CONSUMER_SECRET='WQOj5tNN0ctiFVdRbZXg00hKZsSYDqM4qzNKmZjUhaUZs1I2v2'
+
+# Send emails weekly update every
+# WEEKLY_UPDATE_STATS = 'Sunday'
+
+# Youtube API server key
+# YOUTUBE_API_SERVER_KEY = 'your-key'
+
+# Enable Server Sent Events
+# WARNING: this will require to run PyBossa in async mode. Check the docs.
+# WARNING: if you don't enable async when serving PyBossa, the server will lock
+# WARNING: and it will not work. For this reason, it's disabled by default.
+# SSE = False
+
+# Add here any other ATOM feed that you want to get notified.
+NEWS_URL = ['https://github.com/pybossa/enki/releases.atom', 
+            'https://github.com/pybossa/pybossa-client/releases.atom',
+            'https://github.com/pybossa/pbs/releases.atom']
+
+# Pro user features. False will make the feature available to all regular users,
+# while True will make it available only to pro users
+PRO_FEATURES = {
+    'auditlog':              True,
+    'webhooks':              True,
+    'updated_exports':       True,
+    'notify_blog_updates':   True,
+    'project_weekly_report': True,
+    'autoimporter':          True,
+    'better_stats':          True
+}
+
+# Libsass style. You can use nested, expanded, compact and compressed
+LIBSASS_STYLE = 'compressed'
+
+# CORS resources configuration.
+# WARNING: Only modify this if you know what you are doing. The below config
+# are the defaults, allowing PYBOSSA to have full CORS api. 
+# For more options, check the Flask-Cors documentation: https://flask-cors.readthedocs.io/en/latest/
+CORS_RESOURCES = {r"/*": {}}
+#CORS_RESOURCES = {r"/api/*": {"origins": "", "allow_headers": ['Content-Type','Authorization'],"methods": "*"}}
+
+# Email notifications for background jobs.
+# FAILED_JOBS_MAILS = 7
+# FAILED_JOBS_RETRIES = 3
+
+# Language to use stems, full text search, etc. from postgresql.
+# FULLTEXTSEARCH_LANGUAGE = 'english'

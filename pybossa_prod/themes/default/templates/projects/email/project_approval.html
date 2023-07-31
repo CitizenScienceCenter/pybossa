@@ -1,0 +1,35 @@
+{% extends "account/email/base.html" %}
+
+{% block subject %}
+CCCS Project Builder: {{ _('Project approval') }}
+{% endblock %}
+
+{% block subtitle %}
+{{ _('Hello CCCS administrator') }},
+
+{% endblock %}
+
+{% block body %}
+<p>
+{{ _('We received a request from the user below.') }}
+</p>
+<p>
+{{ user.fullname }} <br>
+{{ user.email_addr }}
+</p>
+
+<p>
+{{ _('To approve the project, please visit the URL below') }}:
+</p>
+<p>
+<a href="{{ project_url_a}}">{{ _('Click here to approve the project on Pybossa') }}</a><br>
+<a href="{{ project_url_b}}">{{ _('Click here to approve the project on lab.citizenscience.ch') }}</a>
+
+</p>
+<p>
+{{ _('Regards') }},
+</p>
+<p>
+{{ config.BRAND }} Team
+</p>
+{% endblock %}

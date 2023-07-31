@@ -77,7 +77,7 @@ from pybossa.decorators.check_project_status import project_is_published
 
 blueprint = Blueprint('project', __name__)
 
-MAX_NUM_SYNCHRONOUS_TASKS_IMPORT = 200
+MAX_NUM_SYNCHRONOUS_TASKS_IMPORT = 4000 #used to be 200
 auditlogger = AuditLogger(auditlog_repo, caller='web')
 importer_queue = Queue('medium',
                        connection=sentinel.master,
@@ -495,12 +495,15 @@ def delete(short_name):
                         pro_features=pro,
                         csrf=generate_csrf())
         return handle_content_type(response)
-    #project_repo.delete(project)
-    #we don't want to delete projects. We just unpublish and put them under the dev@citizenscience.ch account.
-    project.published = False
-    project.owner_id = 36
-    project.owners_ids = [36]
-    project_repo.update(project)
+    print("jan here")
+    if project.published == False:
+        project_repo.delete(project) #this was outcommented until the 21st of September, then changed by Jan
+    else:
+        #we don't want to delete projects. We just unpublish and put them under the dev@citizenscience.ch account.
+        project.published = False
+        project.owner_id = 36
+        project.owners_ids = [36]
+        project_repo.update(project)
     auditlogger.add_log_entry(project, None, current_user)
     flash(gettext('Project deleted!'), 'success')
     return redirect_content_type(url_for('account.profile', name=current_user.name))
@@ -625,6 +628,7 @@ def update(short_name):
 
 @blueprint.route('/<short_name>/')
 def details(short_name):
+    print("Jan Project Short Name Route")
     project, owner, ps = project_by_shortname(short_name)
 
     if project.needs_password():
@@ -712,9 +716,19 @@ def import_task(short_name):
                          pro_features=pro)
 
     importer_type = request.form.get('form_name') or request.args.get('type')
+    
+    print(" \n\n ******* \n Jan before get_all_importer_names \n ********* \n\n ")
+    print( importer_type )
+    
     all_importers = importer.get_all_importer_names()
+
+    
+
     if importer_type is not None and importer_type not in all_importers:
         return abort(404)
+        
+    print(" \n\n ******* \n Jan before GenericBulkTaskImportForm \n ********* \n\n ")
+    
     form = GenericBulkTaskImportForm()(importer_type, request.body)
     template_args['form'] = form
 
@@ -869,6 +883,7 @@ def password_required(short_name):
 
 @blueprint.route('/<short_name>/task/<int:task_id>')
 def task_presenter(short_name, task_id):
+    print("Jan Task Route")
     project, owner, ps = project_by_shortname(short_name)
     task = task_repo.get_task(id=task_id)
     if task is None:
@@ -927,7 +942,10 @@ def task_presenter(short_name, task_id):
 @blueprint.route('/<short_name>/newtask')
 def presenter(short_name):
 
+    print("\n *****Newtask1***** \n")
+
     def invite_new_volunteers(project, ps):
+        print("\n *****Newtask2***** \n")	    
         user_id = None if current_user.is_anonymous else current_user.id
         user_ip = (anonymizer.ip(request.remote_addr or '127.0.0.1')
                    if current_user.is_anonymous else None)
@@ -937,6 +955,7 @@ def presenter(short_name):
         return task == [] and ps.overall_progress < 100.0
 
     def respond(tmpl):
+        print("\n *****Newtask3***** \n")	        
         if (current_user.is_anonymous):
             msg_1 = gettext(msg)
             flash(msg_1, "warning")
@@ -944,6 +963,7 @@ def presenter(short_name):
         return resp
 
     project, owner, ps = project_by_shortname(short_name)
+    print("\n *****Newtask4***** \n")
 
     if project.needs_password():
         redirect_to_password = _check_if_redirect_to_password(project)
@@ -1068,11 +1088,26 @@ def tasks_browse(short_name, page=1):
     project, owner, ps = project_by_shortname(short_name)
     title = project_title(project, "Tasks")
     pro = pro_features()
+    
+    """Return number of tasks."""
+    from sqlalchemy.sql import text
+    from pybossa.model.task import Task
+    from pybossa.core import db
+    sql = text('''SELECT COUNT(*) FROM "task" WHERE project_id = :project_id ''')
+    data = { 'project_id' : project.id }
+    
+    results = db.slave_session.execute(sql, data)
+    print("Jan results")
+    n_tasks_queried = 0
+    for row in results:
+        print( row[ 0 ] )
+        n_tasks_queried = row[ 0 ]
+    
 
     def respond():
         per_page = 10
         offset = (page - 1) * per_page
-        count = ps.n_tasks
+        count = n_tasks_queried #ps.n_tasks
         page_tasks = cached_projects.browse_tasks(project.get('id'), per_page, offset)
         if not page_tasks and page != 1:
             abort(404)
@@ -1090,7 +1125,7 @@ def tasks_browse(short_name, page=1):
                     tasks=page_tasks,
                     title=title,
                     pagination=pagination,
-                    n_tasks=ps.n_tasks,
+                    n_tasks=n_tasks_queried, #ps.n_tasks,
                     overall_progress=ps.overall_progress,
                     n_volunteers=ps.n_volunteers,
                     n_completed_tasks=ps.n_completed_tasks,
@@ -1909,21 +1944,26 @@ def auditlog(short_name):
 @login_required
 #@project_is_published
 def publish(short_name):
-
+    print( 'Project starts to be published Jan' )
     project, owner, ps = project_by_shortname(short_name)
     project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,
                                                                 current_user,
                                                                 ps)
     pro = pro_features()
+    print( 'Jan here 2' )
     ensure_authorized_to('publish', project)
     if request.method == 'GET':
+        print( 'Jan here 3' )
         template_args = {"project": project_sanitized,
                          "pro_features": pro,
                          "csrf": generate_csrf()}
+        approve(short_name)
         response = dict(template='/projects/publish.html', **template_args)
         return handle_content_type(response)
+       
 
     if project.published is False:
+        print( 'Now project is published Jan' )
         project.published = True
         project.info['pending_approval'] = False
         project.info['shareable_key'] = None
@@ -1944,28 +1984,28 @@ def publish(short_name):
     #return redirect(url_for('.details', short_name=project.short_name))
     return handle_content_type(data)
 
-@blueprint.route('/<short_name>/approve', methods=['GET', 'POST'])
-@login_required
+@blueprint.route('/<short_name>/approve', methods=['GET', 'POST', 'OPTIONS'])
+#@login_required
 def approve(short_name):
-
+    print('request arrived in approve method')
     project, owner, ps = project_by_shortname(short_name)
     project_sanitized, owner_sanitized = sanitize_project_owner(project, owner,
                                                                 current_user,
                                                                 ps)
     pro = pro_features()
     #ensure_authorized_to('publish', project)
-    if request.method == 'GET':
-        template_args = {"project": project_sanitized,
-                         "pro_features": pro,
-                         "csrf": generate_csrf()}
-        response = dict(template='/projects/approval.html', **template_args)
-        return handle_content_type(response)
+    #if request.method == 'GET':
+    #    template_args = {"project": project_sanitized,
+    #                     "pro_features": pro,
+    #                     "csrf": generate_csrf()}
+    #    response = dict(template='/projects/approval.html', **template_args)
+    #    return handle_content_type(response)
     #ensure_authorized_to('publish', project)
 
     #send email notification
 
     if 'pending_approval' not in project.info:
-        #print('Pending approval doesnt exist.. adding field to info')
+        print('Pending approval doesnt exist.. adding field to info')
         
         project.info['pending_approval'] = True
         project_repo.save(project)    
@@ -1984,18 +2024,19 @@ def approve(short_name):
         msg['body'] = render_template(
                     '/projects/email/project_approval.md',
                     user=user, 
-                    #project_url_a=project_url_pybossa,
-                    project_url_b=project_url_lab
+                    #project_url_a=project_url_pybossa, 
+                    project_url_b=project_url_lab 
                     )
         msg['html'] = render_template(
                     '/projects/email/project_approval.html',
                     user=user, 
-                    #project_url_a=project_url_pybossa,
-                    project_url_b=project_url_lab,
+                    #project_url_a=project_url_pybossa, 
+                    project_url_b=project_url_lab, 
                     )
         
         #send_mail(msg)
-        mail_queue.enqueue(send_mail, msg)
+        #mail_queue.enqueue(send_mail, msg)
+        send_mail( msg )
         #flash(gettext('Project in approval list!Our administrators will contact you in case we have questions! Thank you!))
         data = dict(title=gettext("Project approval"),
                     status='success',
@@ -2396,6 +2437,7 @@ def export_project_report(short_name):
 
 @blueprint.route('/<int:id>/private')
 def is_private(id):
+    print("\n *****Jan Check if project is private***** \n")	
     """Check if project is private"""
     project = project_repo.get(id)
     #project, owner, ps = project_by_shortname(short_name)

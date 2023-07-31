@@ -277,23 +277,23 @@ def setup_babel(app):
     """Return babel handler."""
     babel.init_app(app)
 
-    @babel.localeselector
-    def _get_locale():
-        from flask import request
-        locales = [l[0] for l in app.config.get('LOCALES')]
-        if current_user.is_authenticated:
-           lang = current_user.locale
-        else:
-            lang = request.cookies.get('language')
-        if (lang is None or lang == '' or
-                lang.lower() not in locales):
-            lang = request.accept_languages.best_match(locales)
-        if (lang is None or lang == '' or
-                lang.lower() not in locales):
-            lang = app.config.get('DEFAULT_LOCALE') or 'en'
-        if request.headers.get('Content-Type') == 'application/json':
-            lang = 'en'
-        return lang.lower()
+    #@babel.localeselector
+    #def _get_locale():
+        #from flask import request
+        #locales = [l[0] for l in app.config.get('LOCALES')]
+        #if current_user.is_authenticated:
+        #   lang = current_user.locale
+        #else:
+        #    lang = request.cookies.get('language')
+        #if (lang is None or lang == '' or
+        #        lang.lower() not in locales):
+        #    lang = request.accept_languages.best_match(locales)
+        #if (lang is None or lang == '' or
+        #        lang.lower() not in locales):
+        #    lang = app.config.get('DEFAULT_LOCALE') or 'en'
+        #if request.headers.get('Content-Type') == 'application/json':
+        #    lang = 'en'
+        #return lang.lower()
     return babel
 
 

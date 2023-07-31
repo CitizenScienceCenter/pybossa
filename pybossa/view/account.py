@@ -863,12 +863,18 @@ def start_export(name):
         return abort(404)
     if user.id != current_user.id:
         return abort(403)
+        
+    print("export user account method jan")
 
     ensure_authorized_to('update', user)
-    export_queue.enqueue(export_userdata,
-                         user_id=user.id)
+    export_userdata( user_id=user.id )
+    #export_queue.enqueue(export_userdata,
+    #                     user_id=user.id)
     msg = gettext('GDPR export started')
     flash(msg, 'success')
+    
+    print("export is finalised jan")
+    
     return redirect_content_type(url_for('account.profile', name=name))
 
 @blueprint.route('/<name>/project/<short_name>/contributions')
@@ -893,9 +899,9 @@ def start_export_contributions(name,short_name):
         return abort(403)
 
     ensure_authorized_to('update', user)
-    #export_queue.enqueue(export_userdata_contributions,
-    #                     user_id=user.id,
-    #                    project_shortname=short_name)
+    #export_queue.enqueue(export_userdata_contributions, #this was outcommented says Jan 20210430
+    #                     user_id=user.id,               #this was outcommented says Jan
+    #                    project_shortname=short_name)   #this was outcommented says Jan
 
     #del user_data['passwd_hash']
     taskruns = task_repo.filter_task_runs_by(user_id=user.id,project_id=project.id)

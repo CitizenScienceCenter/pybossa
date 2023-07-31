@@ -662,7 +662,7 @@ class TestWeb(web.Helper):
             res = self.app.post('/account/register', data=json.dumps(userdict),
                                 content_type='application/json')
             errors = json.loads(res.data)
-            err_msg = "CSRF validation failed."
+            err_msg = "CSRF validation failed here as well."
             assert errors.get('description') == err_msg, err_msg
             err_msg = "Error code should be 400"
             assert errors.get('code') == 400, err_msg

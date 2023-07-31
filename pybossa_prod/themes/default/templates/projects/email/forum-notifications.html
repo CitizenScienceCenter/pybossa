@@ -1,0 +1,36 @@
+{% extends "account/email/base.html" %}
+
+{% block subject %}
+CCCS Project Builder: {{ _('Forum notification') }}
+{% endblock %}
+
+{% block subtitle %}
+{{ _('Hello') }},
+
+{% endblock %}
+
+{% block body %}
+<p>
+{{ _('Someone just replied to a topic you are subscribed to.') }}
+</p>
+
+<p>
+<em>Topic</em><br/>
+{{ data.topic }}
+</p>
+
+<p>
+<em>Reply</em><br/>
+{{ data.reply }}
+</p>
+
+<br/>
+
+<p>
+{{ _('Regards') }},
+</p>
+<p>
+{{ config.BRAND }} Team
+</p>
+{% endblock %}
+
