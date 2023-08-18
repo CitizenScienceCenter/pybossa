@@ -412,8 +412,8 @@ def task_presenter_editor(short_name):
                       preview button!'
         flash(Markup(gettext(msg)), 'info')
     
-    dict_project = add_custom_contrib_button_to(project_sanitized,
-                                                get_user_id_or_ip())
+    dict_project = add_custom_contrib_button_to(project, get_user_id_or_ip(), ps=ps)
+    # dict_project = add_custom_contrib_button_to(project,get_user_id_or_ip())
     project_sanitized, owner_sanitized = sanitize_project_owner(dict_project,
                                                                 owner,
                                                                 current_user,
