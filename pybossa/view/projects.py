@@ -411,17 +411,19 @@ def task_presenter_editor(short_name):
                       the <strong>preview section</strong>. Click in the \
                       preview button!'
         flash(Markup(gettext(msg)), 'info')
-    project_sanitized, owner_sanitized = sanitize_project_owner(project,
+    
+    dict_project = add_custom_contrib_button_to(project_sanitized,
+                                                get_user_id_or_ip())
+    project_sanitized, owner_sanitized = sanitize_project_owner(dict_project,
                                                                 owner,
                                                                 current_user,
                                                                 ps)
 
-    dict_project = add_custom_contrib_button_to(project_sanitized,
-                                                get_user_id_or_ip())
+    
     response = dict(template='projects/task_presenter_editor.html',
                     title=title,
                     form=form,
-                    project=dict_project,
+                    project=project_sanitized,
                     owner=owner_sanitized,
                     overall_progress=ps.overall_progress,
                     n_tasks=ps.n_tasks,
