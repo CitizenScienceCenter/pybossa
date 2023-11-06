@@ -20,7 +20,7 @@ from sqlalchemy import Integer, Boolean, Unicode, Text, String, BigInteger
 from sqlalchemy.schema import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy_json import mutable_json_type
 from flask_login import UserMixin
 from flask import current_app
 
@@ -55,9 +55,6 @@ class User(db.Model, DomainObject, UserMixin):
     restrict = Column(Boolean, default=False, nullable=False)
     category = Column(Integer)
     flags = Column(Integer)
-    twitter_user_id = Column(BigInteger, unique=True)
-    facebook_user_id = Column(BigInteger, unique=True)
-    google_user_id = Column(String, unique=True)
     ckan_api = Column(String, unique=True)
     newsletter_prompted = Column(Boolean, default=False)
     valid_email = Column(Boolean, default=False)
@@ -65,23 +62,20 @@ class User(db.Model, DomainObject, UserMixin):
     subscribed = Column(Boolean, default=False)
     #gtag = Column(Boolean, default=True)
     consent = Column(Boolean, default=False)
-    info = Column(MutableDict.as_mutable(JSONB), default=dict())
+    info = Column(mutable_json_type(dbtype=JSONB, nested=True), default=dict())
     user_pref = Column(JSONB)
 
-    ## Relationships
+    # Relationships
     task_runs = relationship(TaskRun, backref='user')
     projects = relationship(Project, backref='owner')
     blogposts = relationship(Blogpost, backref='owner')
-
 
     def get_id(self):
         '''id for login system. equates to name'''
         return self.name
 
-
     def set_password(self, password):
         self.passwd_hash = signer.generate_password_hash(password)
-
 
     def check_password(self, password):
         # OAuth users do not have a password

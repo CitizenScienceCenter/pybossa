@@ -1123,6 +1123,7 @@ class TestWeb(web.Helper):
     def test_confirm_account_newsletter(self, fake_signer, url_for, newsletter):
         """Test WEB confirm email shows newsletter or home."""
         newsletter.ask_user_to_subscribe.return_value = True
+        url_for.return_value = 'next_url'
         with patch.dict(self.flask_app.config, {'MAILCHIMP_API_KEY': 'key'}):
             self.register()
             user = db.session.query(User).get(1)
@@ -1146,6 +1147,7 @@ class TestWeb(web.Helper):
     def test_newsletter_json(self, fake_signer, url_for, newsletter):
         """Test WEB confirm email shows newsletter or home with JSON."""
         newsletter.ask_user_to_subscribe.return_value = True
+        url_for.return_value = 'next_url'
         with patch.dict(self.flask_app.config, {'MAILCHIMP_API_KEY': 'key'}):
             self.register()
             user = db.session.query(User).get(1)
@@ -3248,177 +3250,6 @@ class TestWeb(web.Helper):
         assert "Ooops, we didn&#39;t find you in the system" in str(res.data), res.data
 
     @with_context
-    def test_39_google_oauth_creation(self):
-        """Test WEB Google OAuth creation of user works"""
-        fake_response = {
-            'access_token': 'access_token',
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-            'id_token': 'token'}
-
-        fake_user = {
-            'family_name': 'Doe', 'name': 'John Doe',
-            'picture': 'https://goo.gl/img.jpg',
-            'locale': 'en',
-            'gender': 'male',
-            'email': 'john@gmail.com',
-            'birthday': '0000-01-15',
-            'link': 'https://plus.google.com/id',
-            'given_name': 'John',
-            'id': '111111111111111111111',
-            'verified_email': True}
-
-        from pybossa.view import google
-        response_user = google.manage_user(fake_response['access_token'],
-                                           fake_user)
-
-        user = db.session.query(User).get(1)
-
-        assert user.email_addr == response_user.email_addr, response_user
-
-    @with_context
-    def test_40_google_oauth_creation(self):
-        """Test WEB Google OAuth detects same user name/email works"""
-        fake_response = {
-            'access_token': 'access_token',
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-            'id_token': 'token'}
-
-        fake_user = {
-            'family_name': 'Doe', 'name': 'John Doe',
-            'picture': 'https://goo.gl/img.jpg',
-            'locale': 'en',
-            'gender': 'male',
-            'email': 'john@gmail.com',
-            'birthday': '0000-01-15',
-            'link': 'https://plus.google.com/id',
-            'given_name': 'John',
-            'id': '111111111111111111111',
-            'verified_email': True}
-
-        self.register()
-        self.signout()
-
-        from pybossa.view import google
-        response_user = google.manage_user(fake_response['access_token'],
-                                           fake_user)
-
-        assert response_user is None, response_user
-
-    @with_context
-    def test_39_facebook_oauth_creation(self):
-        """Test WEB Facebook OAuth creation of user works"""
-        fake_response = {
-            'access_token': 'access_token',
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-            'id_token': 'token'}
-
-        fake_user = {
-            'username': 'teleyinex',
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'verified': True,
-            'name': 'John Doe',
-            'locale': 'en_US',
-            'gender': 'male',
-            'email': 'johndoe@example.com',
-            'quotes': '"quote',
-            'link': 'http://www.facebook.com/johndoe',
-            'timezone': 1,
-            'updated_time': '2011-11-11T12:33:52+0000',
-            'id': '11111'}
-
-        from pybossa.view import facebook
-        response_user = facebook.manage_user(fake_response['access_token'],
-                                             fake_user)
-
-        user = db.session.query(User).get(1)
-
-        assert user.email_addr == response_user.email_addr, response_user
-
-    @with_context
-    def test_40_facebook_oauth_creation(self):
-        """Test WEB Facebook OAuth detects same user name/email works"""
-        fake_response = {
-            'access_token': 'access_token',
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-            'id_token': 'token'}
-
-        fake_user = {
-            'username': 'teleyinex',
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'verified': True,
-            'name': 'John Doe',
-            'locale': 'en_US',
-            'gender': 'male',
-            'email': 'johndoe@example.com',
-            'quotes': '"quote',
-            'link': 'http://www.facebook.com/johndoe',
-            'timezone': 1,
-            'updated_time': '2011-11-11T12:33:52+0000',
-            'id': '11111'}
-
-        self.register()
-        self.signout()
-
-        from pybossa.view import facebook
-        response_user = facebook.manage_user(fake_response['access_token'],
-                                             fake_user)
-
-        assert response_user is None, response_user
-
-    @with_context
-    def test_39_twitter_oauth_creation(self):
-        """Test WEB Twitter OAuth creation of user works"""
-        fake_response = {
-            'access_token': {'oauth_token': 'oauth_token',
-                              'oauth_token_secret': 'oauth_token_secret'},
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-            'id_token': 'token'}
-
-        fake_user = {'screen_name': 'johndoe',
-                     'user_id': '11111'}
-
-        from pybossa.view import twitter
-        response_user = twitter.manage_user(fake_response['access_token'],
-                                            fake_user)
-
-        user = db.session.query(User).get(1)
-
-        assert user.email_addr == response_user.email_addr, response_user
-
-        res = self.signin(email=user.email_addr, password='wrong')
-        msg = "It seems like you signed up with your Twitter account"
-        assert msg in str(res.data), msg
-
-    @with_context
-    def test_40_twitter_oauth_creation(self):
-        """Test WEB Twitter OAuth detects same user name/email works"""
-        fake_response = {
-            'access_token': {'oauth_token': 'oauth_token',
-                              'oauth_token_secret': 'oauth_token_secret'},
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-            'id_token': 'token'}
-
-        fake_user = {'screen_name': 'johndoe',
-                     'user_id': '11111'}
-
-        self.register()
-        self.signout()
-
-        from pybossa.view import twitter
-        response_user = twitter.manage_user(fake_response['access_token'],
-                                            fake_user)
-
-        assert response_user is None, response_user
-
-    @with_context
     def test_41_password_change_json(self):
         """Test WEB password JSON changing"""
         password = "mehpassword"
@@ -3616,19 +3447,6 @@ class TestWeb(web.Helper):
         mock.assert_called_with(delete_account, user.id)
 
     @with_context
-    def test_42_password_link(self):
-        """Test WEB visibility of password change link"""
-        self.register()
-        res = self.app.get('/account/johndoe/update')
-        assert "Change your Password" in str(res.data)
-        user = User.query.get(1)
-        user.twitter_user_id = 1234
-        db.session.add(user)
-        db.session.commit()
-        res = self.app.get('/account/johndoe/update')
-        assert "Change your Password" not in str(res.data), res.data
-
-    @with_context
     def test_43_terms_of_use_and_data(self):
         """Test WEB terms of use is working"""
         res = self.app.get('account/signin', follow_redirects=True)
@@ -3806,12 +3624,7 @@ class TestWeb(web.Helper):
         self.register(name='facebook')
         user = User.query.get(1)
         jane = User.query.get(2)
-        jane.twitter_user_id = 10
-        google = User.query.get(3)
-        google.google_user_id = 103
-        facebook = User.query.get(4)
-        facebook.facebook_user_id = 104
-        db.session.add_all([jane, google, facebook])
+        db.session.add_all([jane])
         db.session.commit()
 
         data = {'password': user.passwd_hash, 'user': user.name}
@@ -3842,48 +3655,6 @@ class TestWeb(web.Helper):
                             headers={'X-CSRFToken': csrf})
 
         resdata = json.loads(res.data)
-
-        enqueue_call = queue.enqueue.call_args_list[1]
-        assert send_mail == enqueue_call[0][0], "send_mail not called"
-        assert 'your Twitter account to ' in enqueue_call[0][1]['body']
-        assert 'your Twitter account to ' in enqueue_call[0][1]['html']
-        err_msg = "There should be a flash message"
-        assert resdata.get('flash'), err_msg
-        assert "sent you an email" in resdata.get('flash'), err_msg
-
-        data = {'password': google.passwd_hash, 'user': google.name}
-        csrf = self.get_csrf('/account/forgot-password')
-        res = self.app.post('/account/forgot-password',
-                            data=json.dumps({'email_addr': 'google@example.com'}),
-                            follow_redirects=False,
-                            content_type="application/json",
-                            headers={'X-CSRFToken': csrf})
-
-        resdata = json.loads(res.data)
-
-        enqueue_call = queue.enqueue.call_args_list[2]
-        assert send_mail == enqueue_call[0][0], "send_mail not called"
-        assert 'your Google account to ' in enqueue_call[0][1]['body']
-        assert 'your Google account to ' in enqueue_call[0][1]['html']
-        err_msg = "There should be a flash message"
-        assert resdata.get('flash'), err_msg
-        assert "sent you an email" in resdata.get('flash'), err_msg
-
-        data = {'password': facebook.passwd_hash, 'user': facebook.name}
-        csrf = self.get_csrf('/account/forgot-password')
-        res = self.app.post('/account/forgot-password',
-                            data=json.dumps({'email_addr': 'facebook@example.com'}),
-                            follow_redirects=False,
-                            content_type="application/json",
-                            headers={'X-CSRFToken': csrf})
-
-        enqueue_call = queue.enqueue.call_args_list[3]
-        assert send_mail == enqueue_call[0][0], "send_mail not called"
-        assert 'your Facebook account to ' in enqueue_call[0][1]['body']
-        assert 'your Facebook account to ' in enqueue_call[0][1]['html']
-        err_msg = "There should be a flash message"
-        assert resdata.get('flash'), err_msg
-        assert "sent you an email" in resdata.get('flash'), err_msg
 
         # Test with not valid form
         csrf = self.get_csrf('/account/forgot-password')
@@ -3934,16 +3705,9 @@ class TestWeb(web.Helper):
 
         self.register()
         self.register(name='janedoe')
-        self.register(name='google')
-        self.register(name='facebook')
         user = User.query.get(1)
         jane = User.query.get(2)
-        jane.twitter_user_id = 10
-        google = User.query.get(3)
-        google.google_user_id = 103
-        facebook = User.query.get(4)
-        facebook.facebook_user_id = 104
-        db.session.add_all([jane, google, facebook])
+        db.session.add_all([jane])
         db.session.commit()
 
         data = {'password': user.passwd_hash, 'user': user.name}
@@ -3962,26 +3726,8 @@ class TestWeb(web.Helper):
                       follow_redirects=True)
         enqueue_call = queue.enqueue.call_args_list[1]
         assert send_mail == enqueue_call[0][0], "send_mail not called"
-        assert 'your Twitter account to ' in enqueue_call[0][1]['body']
-        assert 'your Twitter account to ' in enqueue_call[0][1]['html']
-
-        data = {'password': google.passwd_hash, 'user': google.name}
-        self.app.post('/account/forgot-password',
-                      data={'email_addr': 'google@example.com'},
-                      follow_redirects=True)
-        enqueue_call = queue.enqueue.call_args_list[2]
-        assert send_mail == enqueue_call[0][0], "send_mail not called"
-        assert 'your Google account to ' in enqueue_call[0][1]['body']
-        assert 'your Google account to ' in enqueue_call[0][1]['html']
-
-        data = {'password': facebook.passwd_hash, 'user': facebook.name}
-        self.app.post('/account/forgot-password',
-                      data={'email_addr': 'facebook@example.com'},
-                      follow_redirects=True)
-        enqueue_call = queue.enqueue.call_args_list[3]
-        assert send_mail == enqueue_call[0][0], "send_mail not called"
-        assert 'your Facebook account to ' in enqueue_call[0][1]['body']
-        assert 'your Facebook account to ' in enqueue_call[0][1]['html']
+        assert 'Click here to recover your account' in enqueue_call[0][1]['body']
+        assert 'To recover your password' in enqueue_call[0][1]['html']
 
         # Test with not valid form
         res = self.app.post('/account/forgot-password',
@@ -5501,12 +5247,8 @@ class TestWeb(web.Helper):
         assert "type=gdocs" in str(res.data), err_msg
         err_msg = "There should be an Epicollect importer"
         assert "type=epicollect" in str(res.data), err_msg
-        err_msg = "There should be a Flickr importer"
-        assert "type=flickr" in str(res.data), err_msg
         err_msg = "There should be a Dropbox importer"
         assert "type=dropbox" in str(res.data), err_msg
-        err_msg = "There should be a Twitter importer"
-        assert "type=twitter" in str(res.data), err_msg
         err_msg = "There should be an S3 importer"
         assert "type=s3" in str(res.data), err_msg
         err_msg = "There should be an Image template"
@@ -5545,11 +5287,9 @@ class TestWeb(web.Helper):
         importers = ["projects/tasks/epicollect.html",
                      "projects/tasks/csv.html",
                      "projects/tasks/s3.html",
-                     "projects/tasks/twitter.html",
                      "projects/tasks/youtube.html",
                      "projects/tasks/gdocs.html",
                      "projects/tasks/dropbox.html",
-                     "projects/tasks/flickr.html",
                      "projects/tasks/localCSV.html",
                      "projects/tasks/iiif.html"]
         assert sorted(data['available_importers']) == sorted(importers), data
@@ -5557,11 +5297,9 @@ class TestWeb(web.Helper):
         importers = ['&type=epicollect',
                      '&type=csv',
                      '&type=s3',
-                     '&type=twitter',
                      '&type=youtube',
                      '&type=gdocs',
                      '&type=dropbox',
-                     '&type=flickr',
                      '&type=localCSV',
                      '&type=iiif']
 
@@ -5577,18 +5315,12 @@ class TestWeb(web.Helper):
             if importer == 's3':
                 assert 'files' in list(data['form'].keys()), data
                 assert 'bucket' in list(data['form'].keys()), data
-            if 'twitter' in importer:
-                assert 'max_tweets' in list(data['form'].keys()), data
-                assert 'source' in list(data['form'].keys()), data
-                assert 'user_credentials' in list(data['form'].keys()), data
             if 'youtube' in importer:
                 assert 'playlist_url' in list(data['form'].keys()), data
             if 'gdocs' in importer:
                 assert 'googledocs_url' in list(data['form'].keys()), data
             if 'dropbox' in importer:
                 assert 'files' in list(data['form'].keys()), data
-            if 'flickr' in importer:
-                assert 'album_id' in list(data['form'].keys()), data
             if 'localCSV' in importer:
                 assert 'form_name' in list(data['form'].keys()), data
             if 'iiif' in importer:
@@ -5611,11 +5343,6 @@ class TestWeb(web.Helper):
                 res = self.app_post_json(url + importer, data=data)
                 data = json.loads(res.data)
                 assert data['flash'] == "SUCCESS", data
-            if 'twitter' in importer:
-                data = dict(max_tweets=1, source='bucket', user_credentials='user')
-                res = self.app_post_json(url + importer, data=data)
-                data = json.loads(res.data)
-                assert data['flash'] == "SUCCESS", data
             if 'youtube' in importer:
                 data = dict(playlist_url='url')
                 res = self.app_post_json(url + importer, data=data)
@@ -5628,11 +5355,6 @@ class TestWeb(web.Helper):
                 assert data['flash'] == "SUCCESS", data
             if 'dropbox' in importer:
                 data = dict(files='http://domain.com')
-                res = self.app_post_json(url + importer, data=data)
-                data = json.loads(res.data)
-                assert data['flash'] == "SUCCESS", data
-            if 'flickr' in importer:
-                data = dict(album_id=13)
                 res = self.app_post_json(url + importer, data=data)
                 data = json.loads(res.data)
                 assert data['flash'] == "SUCCESS", data
@@ -5658,11 +5380,9 @@ class TestWeb(web.Helper):
         importers = ["projects/tasks/epicollect.html",
                      "projects/tasks/csv.html",
                      "projects/tasks/s3.html",
-                     "projects/tasks/twitter.html",
                      "projects/tasks/youtube.html",
                      "projects/tasks/gdocs.html",
                      "projects/tasks/dropbox.html",
-                     "projects/tasks/flickr.html",
                      "projects/tasks/localCSV.html",
                      "projects/tasks/iiif.html"]
         assert sorted(data['available_importers']) == sorted(importers), (importers,
@@ -5725,28 +5445,12 @@ class TestWeb(web.Helper):
         assert "From an EpiCollect Plus project" in data
         assert 'action="/project/%E2%9C%93project1/tasks/import"' in data
 
-        # Flickr
-        url = "/project/%s/tasks/import?type=flickr" % project.short_name
-        res = self.app.get(url, follow_redirects=True)
-        data = res.data.decode('utf-8')
-
-        assert "From a Flickr Album" in data
-        assert 'action="/project/%E2%9C%93project1/tasks/import"' in data
-
         # Dropbox
         url = "/project/%s/tasks/import?type=dropbox" % project.short_name
         res = self.app.get(url, follow_redirects=True)
         data = res.data.decode('utf-8')
 
         assert "From your Dropbox account" in data
-        assert 'action="/project/%E2%9C%93project1/tasks/import"' in data
-
-        # Twitter
-        url = "/project/%s/tasks/import?type=twitter" % project.short_name
-        res = self.app.get(url, follow_redirects=True)
-        data = res.data.decode('utf-8')
-
-        assert "From a Twitter hashtag or account" in data
         assert 'action="/project/%E2%9C%93project1/tasks/import"' in data
 
         # S3
@@ -5782,9 +5486,7 @@ class TestWeb(web.Helper):
 
         res = self.app.get(url, follow_redirects=True)
 
-        assert "type=flickr"  not in str(res.data)
         assert "type=dropbox"  not in str(res.data)
-        assert "type=twitter"  not in str(res.data)
 
     @with_context
     @patch('pybossa.view.projects.redirect_content_type', wraps=redirect)
@@ -5987,63 +5689,6 @@ class TestWeb(web.Helper):
             assert t.info == epi_tasks[n], "The task info should be the same"
             n += 1
 
-    @with_context
-    @patch('pybossa.importers.flickr.requests.get')
-    def test_bulk_flickr_import_works(self, request):
-        """Test WEB bulk Flickr import works"""
-        data = {
-            "photoset": {
-                "id": "72157633923521788",
-                "primary": "8947113500",
-                "owner": "32985084@N00",
-                "ownername": "Teleyinex",
-                "photo": [{"id": "8947115130", "secret": "00e2301a0d",
-                           "server": "5441", "farm": 6, "title": "Title",
-                           "isprimary": 0, "ispublic": 1, "isfriend": 0,
-                           "isfamily": 0}
-                          ],
-                "page": 1,
-                "per_page": "500",
-                "perpage": "500",
-                "pages": 1,
-                "total": 1,
-                "title": "Science Hack Day Balloon Mapping Workshop"},
-            "stat": "ok"}
-        fake_response = FakeResponse(text=json.dumps(data), status_code=200,
-                                     headers={'content-type': 'application/json'},
-                                     encoding='utf-8')
-        request.return_value = fake_response
-        self.register()
-        self.new_project()
-        project = db.session.query(Project).first()
-        res = self.app.post(('/project/%s/tasks/import' % (project.short_name)),
-                            data={'album_id': '1234',
-                                  'form_name': 'flickr'},
-                            follow_redirects=True)
-
-        project = db.session.query(Project).first()
-        err_msg = "Tasks should be imported"
-        assert "1 new task was imported successfully" in str(res.data), err_msg
-        tasks = db.session.query(Task).filter_by(project_id=project.id).all()
-        expected_info = {
-            'url': 'https://farm6.staticflickr.com/5441/8947115130_00e2301a0d.jpg',
-            'url_m': 'https://farm6.staticflickr.com/5441/8947115130_00e2301a0d_m.jpg',
-            'url_b': 'https://farm6.staticflickr.com/5441/8947115130_00e2301a0d_b.jpg',
-            'link': 'https://www.flickr.com/photos/32985084@N00/8947115130',
-            'title': 'Title'}
-        assert tasks[0].info == expected_info, tasks[0].info
-
-    @with_context
-    def test_flickr_importer_page_shows_option_to_log_into_flickr(self):
-        self.register()
-        owner = db.session.query(User).first()
-        project = ProjectFactory.create(owner=owner)
-        url = "/project/%s/tasks/import?type=flickr" % project.short_name
-
-        res = self.app.get(url)
-        login_url = '/flickr/?next=%2Fproject%2F%25E2%259C%2593project1%2Ftasks%2Fimport%3Ftype%3Dflickr'
-
-        assert login_url in str(res.data)
 
     @with_context
     def test_bulk_dropbox_import_works(self):
@@ -6070,54 +5715,6 @@ class TestWeb(web.Helper):
         assert tasks[0].info == expected_info, tasks[0].info
 
     @with_context
-    @patch('pybossa.importers.twitterapi.Twitter')
-    @patch('pybossa.importers.twitterapi.oauth2_dance')
-    def test_bulk_twitter_import_works(self, oauth, client):
-        """Test WEB bulk Twitter import works"""
-        tweet_data = {
-            'statuses': [
-                {
-                    'created_at': 'created',
-                    'favorite_count': 77,
-                    'coordinates': 'coords',
-                    'id_str': '1',
-                    'id': 1,
-                    'retweet_count': 44,
-                    'user': {'screen_name': 'fulanito'},
-                    'text': 'this is a tweet #match'
-                }
-            ]
-        }
-        client_instance = Mock()
-        client_instance.search.tweets.return_value = tweet_data
-        client.return_value = client_instance
-
-        self.register()
-        self.new_project()
-        project = db.session.query(Project).first()
-        res = self.app.post('/project/%s/tasks/import' % project.short_name,
-                            data={'source': '#match',
-                                  'max_tweets': 1,
-                                  'form_name': 'twitter'},
-                            follow_redirects=True)
-
-        project = db.session.query(Project).first()
-        err_msg = "Tasks should be imported"
-        tasks = db.session.query(Task).filter_by(project_id=project.id).all()
-        expected_info = {
-            'created_at': 'created',
-            'favorite_count': 77,
-            'coordinates': 'coords',
-            'id_str': '1',
-            'id': 1,
-            'retweet_count': 44,
-            'user': {'screen_name': 'fulanito'},
-            'user_screen_name': 'fulanito',
-            'text': 'this is a tweet #match'
-        }
-        assert tasks[0].info == expected_info, tasks[0].info
-
-    @with_context
     def test_bulk_s3_import_works(self):
         """Test WEB bulk S3 import works"""
         self.register()
@@ -6138,34 +5735,6 @@ class TestWeb(web.Helper):
             'link': 'https://mybucket.s3.amazonaws.com/myfile.txt'
         }
         assert tasks[0].info == expected_info, tasks[0].info
-
-    @with_context
-    def test_55_facebook_account_warning(self):
-        """Test WEB Facebook OAuth user gets a hint to sign in"""
-        user = User(fullname='John',
-                    name='john',
-                    email_addr='john@john.com',
-                    info={})
-
-        user.info = dict(facebook_token='facebook')
-        msg, method = get_user_signup_method(user)
-        err_msg = "Should return 'facebook' but returned %s" % method
-        assert method == 'facebook', err_msg
-
-        user.info = dict(google_token='google')
-        msg, method = get_user_signup_method(user)
-        err_msg = "Should return 'google' but returned %s" % method
-        assert method == 'google', err_msg
-
-        user.info = dict(twitter_token='twitter')
-        msg, method = get_user_signup_method(user)
-        err_msg = "Should return 'twitter' but returned %s" % method
-        assert method == 'twitter', err_msg
-
-        user.info = {}
-        msg, method = get_user_signup_method(user)
-        err_msg = "Should return 'local' but returned %s" % method
-        assert method == 'local', err_msg
 
     @with_context
     def test_56_delete_tasks(self):

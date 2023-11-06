@@ -157,20 +157,10 @@ def signin():
 
     if request.method == 'POST' and not form.validate():
         flash(gettext('Please correct the errors'), 'error')
-    auth = {'twitter': False, 'facebook': False, 'google': False}
     if current_user.is_anonymous:
-        # If Twitter is enabled in config, show the Twitter Sign in button
-        if (isLdap is False):
-            if ('twitter' in current_app.blueprints):  # pragma: no cover
-                auth['twitter'] = True
-            if ('facebook' in current_app.blueprints):  # pragma: no cover
-                auth['facebook'] = True
-            if ('google' in current_app.blueprints):  # pragma: no cover
-                auth['google'] = True
         response = dict(template='account/signin.html',
                         title="Sign in",
                         form=form,
-                        auth=auth,
                         next=request.args.get('next'))
         return handle_content_type(response)
     else:
@@ -580,8 +570,6 @@ def update_profile(name):
         return abort(404)
     ensure_authorized_to('update', user)
     show_passwd_form = True
-    if user.twitter_user_id or user.google_user_id or user.facebook_user_id:
-        show_passwd_form = False
     usr = cached_users.get_user_summary(name, current_user)
     # Extend the values
     user.rank = usr.get('rank')
@@ -835,7 +823,6 @@ def forgot_password():
                 msg['html'] = render_template(
                     '/account/email/forgot_password.html',
                     user=user, recovery_url=recovery_url)
-            #send_mail(msg)
             mail_queue.enqueue(send_mail, msg)
             flash(gettext("We've sent you an email with account recovery instructions!"),
                   'success')

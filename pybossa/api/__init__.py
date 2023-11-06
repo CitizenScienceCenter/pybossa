@@ -53,7 +53,6 @@ from .blogpost import BlogpostAPI
 from .category import CategoryAPI
 from .favorites import FavoritesAPI
 from .user import UserAPI
-from .token import TokenAPI
 from .result import ResultAPI
 from .project_stats import ProjectStatsAPI
 from .helpingmaterial import HelpingMaterialAPI
@@ -94,14 +93,17 @@ def register_api(view, endpoint, url, pk='id', pk_type='int'):
                            view_func=view_func,
                            methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 
+
 register_api(ProjectAPI, 'api_project', '/project', pk='oid', pk_type='int')
-register_api(ProjectStatsAPI, 'api_projectstats', '/projectstats', pk='oid', pk_type='int')
+register_api(ProjectStatsAPI, 'api_projectstats',
+             '/projectstats', pk='oid', pk_type='int')
 register_api(CategoryAPI, 'api_category', '/category', pk='oid', pk_type='int')
 register_api(TaskAPI, 'api_task', '/task', pk='oid', pk_type='int')
 register_api(TaskRunAPI, 'api_taskrun', '/taskrun', pk='oid', pk_type='int')
 register_api(ResultAPI, 'api_result', '/result', pk='oid', pk_type='int')
 register_api(UserAPI, 'api_user', '/user', pk='oid', pk_type='int')
-register_api(AnnouncementAPI, 'api_announcement', '/announcement', pk='oid', pk_type='int')
+register_api(AnnouncementAPI, 'api_announcement',
+             '/announcement', pk='oid', pk_type='int')
 register_api(BlogpostAPI, 'api_blogpost', '/blogpost', pk='oid', pk_type='int')
 register_api(HelpingMaterialAPI, 'api_helpingmaterial',
              '/helpingmaterial', pk='oid', pk_type='int')
@@ -111,7 +113,6 @@ register_api(GlobalStatsAPI, 'api_globalstats', '/globalstats',
              pk='oid', pk_type='int')
 register_api(FavoritesAPI, 'api_favorites', '/favorites',
              pk='oid', pk_type='int')
-register_api(TokenAPI, 'api_token', '/token', pk='token', pk_type='string')
 
 
 @jsonpify
@@ -234,12 +235,16 @@ def user_progress(project_id=None, short_name=None):
             project = project_repo.get(project_id)
 
         if project:
-            # For now, keep this version, but wait until redis cache is 
+            # For now, keep this version, but wait until redis cache is
             # used here for task_runs too
+            external_uid = request.args.get('external_uid')
             query_attrs = dict(project_id=project.id)
             if current_user.is_anonymous:
-                query_attrs['user_ip'] = anonymizer.ip(request.remote_addr or
-                                                       '127.0.0.1')
+                if external_uid is None:
+                    anon_ip = request.remote_addr or '127.0.0.1'
+                    query_attrs['user_ip'] = anonymizer.ip(anon_ip)
+                else:
+                    query_attrs['external_uid'] = external_uid
             else:
                 query_attrs['user_id'] = current_user.id
             taskrun_count = task_repo.count_task_runs_with(**query_attrs)
@@ -279,7 +284,8 @@ def get_disqus_sso_api():
     """Return remote_auth_s3 and api_key for disqus SSO."""
     try:
         if current_user.is_authenticated:
-            message, timestamp, sig, pub_key = get_disqus_sso_payload(current_user)
+            message, timestamp, sig, pub_key = get_disqus_sso_payload(
+                current_user)
         else:
             message, timestamp, sig, pub_key = get_disqus_sso_payload(None)
 
