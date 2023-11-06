@@ -128,13 +128,13 @@ class Project(db.Model, DomainObject):
                 'overall_progress', 'short_name', 'created', 'category_id',
                 'long_description', 'last_activity', 'last_activity_raw',
                 'n_task_runs', 'n_results', 'owner', 'updated', 'featured',
-                'owner_id', 'n_completed_tasks', 'n_blogposts', 'owners_ids']
+                'owner_id', 'n_completed_tasks', 'n_blogposts', 'owners_ids','restricted']
 
     @classmethod
     def public_info_keys(self):
         """Return a list of public info keys."""
         default = ['container', 'thumbnail', 'thumbnail_url',
-                   'task_presenter', 'tutorial', 'sched']
+                   'task_presenter', 'tutorial', 'sched','private','flagship']
         extra = current_app.config.get('PROJECT_INFO_PUBLIC_FIELDS')
         if extra:
             return list(set(default).union(set(extra)))

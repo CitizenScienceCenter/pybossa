@@ -55,7 +55,7 @@ class TestJsonProject(web.Helper):
             res = self.app_post_json(url, follow_redirects=True)
             data = json.loads(res.data)
             assert data.get('code') == 400, data
-            assert data.get('description') == 'CSRF validation failed.', data
+            assert data.get('description') == 'CSRF validation failed here.', data
 
             # With errors and CSRF
             csrf = self.get_csrf(url)

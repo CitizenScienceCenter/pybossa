@@ -251,6 +251,7 @@ from .webhook_repository import WebhookRepository
 from .result_repository import ResultRepository
 from .helping_repository import HelpingMaterialRepository
 from .page_repository import PageRepository
+from .comment_repository import CommentRepository
 
 assert ProjectRepository
 assert ProjectStatsRepository
@@ -263,3 +264,4 @@ assert WebhookRepository
 assert ResultRepository
 assert HelpingMaterialRepository
 assert PageRepository
+assert CommentRepository

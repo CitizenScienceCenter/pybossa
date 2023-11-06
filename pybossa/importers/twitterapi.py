@@ -31,6 +31,7 @@ class BulkTaskTwitterImport(BulkTaskImport):
             self.client = UserCredentialsClient(consumer_key, consumer_secret,
                                                 user_credentials)
         else:
+            print( 'Jan ' + consumer_key + ' ' + consumer_secret )
             self.client = AppCredentialsClient(consumer_key, consumer_secret)
         self.source = source
         self.count = self.DEFAULT_TWEETS if max_tweets is None else max_tweets
@@ -135,8 +136,9 @@ class UserCredentialsClient(TwitterClient):
 class AppCredentialsClient(TwitterClient):
 
     def __init__(self, consumer_key, consumer_secret):
-        bearer_token = oauth2_dance(consumer_key, consumer_secret)
-        auth = OAuth2(bearer_token=bearer_token)
+        #bearer_token = oauth2_dance(consumer_key, consumer_secret)
+        #jan changed OAuth2(bearer_token=bearer_token) to the following line:
+        auth = OAuth2(bearer_token='AAAAAAAAAAAAAAAAAAAAAAYa%2FgAAAAAAiBaZcQ9TufTkOswDrWb0p5UxbV4%3DFSFZk20pEey9BpIsINCniZheHbwrApRNk1iebYACSnqVS7hZsx')
         self.api = Twitter(auth=auth)
 
     def fetch_all_statuses(self, source, count, since_id):

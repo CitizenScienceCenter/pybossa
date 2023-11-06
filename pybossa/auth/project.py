@@ -58,3 +58,8 @@ class ProjectAuth(object):
     def _only_admin_or_owner(self, user, project):
         return (not user.is_anonymous and
                 (user.id in project.owners_ids or user.admin))
+    
+    def _only_admin(self, user, project):
+        #print (user.admin)
+        return (not user.is_anonymous and
+                user.admin)

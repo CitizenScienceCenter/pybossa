@@ -30,7 +30,7 @@ from itsdangerous import BadData
 from markdown import markdown
 import time
 
-from flask import Blueprint, request, url_for, flash, redirect, abort
+from flask import Blueprint, request, url_for, flash, redirect, abort, send_from_directory
 from flask import render_template, current_app
 from flask_login import login_required, login_user, logout_user, \
     current_user
@@ -288,8 +288,7 @@ def confirm_email():
         msg['html'] = render_template('/account/email/validate_email.html',
                                       user=account, confirm_url=confirm_url)
         mail_queue.enqueue(send_mail, msg)
-        msg = gettext("An e-mail has been sent to \
-                       validate your e-mail address.")
+        msg = gettext("An email has been sent to validate your email address")
         flash(msg, 'info')
         user.confirmation_email_sent = True
         user_repo.update(user)
@@ -341,7 +340,8 @@ def register():
         mail_queue.enqueue(send_mail, msg)
         data = dict(template='account/account_validation.html',
                     title=gettext("Account validation"),
-                    status='sent')
+                    status='sent',
+                    flash='An email has been sent to validate your email address')
         return handle_content_type(data)
     if request.method == 'POST' and not form.validate():
         flash(gettext('Please correct the errors'), 'error')
@@ -650,8 +650,7 @@ def _handle_avatar_update(user, avatar_form):
         user.info['avatar_url'] = avatar_url
         user_repo.update(user)
         cached_users.delete_user_summary(user.name)
-        flash(gettext('Your avatar has been updated! It may \
-                      take some minutes to refresh...'), 'success')
+        flash(gettext('Your avatar has been updated! It may take some minutes to refresh'), 'success')
         return True
     else:
         flash("You have to provide an image file to update your avatar", "error")
@@ -714,7 +713,7 @@ def _handle_password_update(user, password_form):
         if user.check_password(password_form.current_password.data):
             user.set_password(password_form.new_password.data)
             user_repo.update(user)
-            flash(gettext('Yay, you changed your password succesfully!'),
+            flash(gettext('You changed your password succesfully!'),
                   'success')
             return True
         else:
@@ -792,25 +791,43 @@ def forgot_password():
         if user and user.email_addr:
             msg = dict(subject='Account Recovery',
                        recipients=[user.email_addr])
-            userdict = {'user': user.name, 'password': user.passwd_hash}
-            key = signer.dumps(userdict, salt='password-reset')
-            recovery_url = url_for_app_type('.reset_password',
-                                            key=key, _external=True)
-            msg['body'] = render_template(
-                '/account/email/forgot_password.md',
-                user=user, recovery_url=recovery_url)
-            msg['html'] = render_template(
-                '/account/email/forgot_password.html',
-                user=user, recovery_url=recovery_url)
+            if user.twitter_user_id:
+                msg['body'] = render_template(
+                    '/account/email/forgot_password_openid.md',
+                    user=user, account_name='Twitter')
+                msg['html'] = render_template(
+                    '/account/email/forgot_password_openid.html',
+                    user=user, account_name='Twitter')
+            elif user.facebook_user_id:
+                msg['body'] = render_template(
+                    '/account/email/forgot_password_openid.md',
+                    user=user, account_name='Facebook')
+                msg['html'] = render_template(
+                    '/account/email/forgot_password_openid.html',
+                    user=user, account_name='Facebook')
+            elif user.google_user_id:
+                msg['body'] = render_template(
+                    '/account/email/forgot_password_openid.md',
+                    user=user, account_name='Google')
+                msg['html'] = render_template(
+                    '/account/email/forgot_password_openid.html',
+                    user=user, account_name='Google')
+            else:
+                userdict = {'user': user.name, 'password': user.passwd_hash}
+                key = signer.dumps(userdict, salt='password-reset')
+                recovery_url = url_for_app_type('.reset_password',
+                                                key=key, _external=True)
+                msg['body'] = render_template(
+                    '/account/email/forgot_password.md',
+                    user=user, recovery_url=recovery_url)
+                msg['html'] = render_template(
+                    '/account/email/forgot_password.html',
+                    user=user, recovery_url=recovery_url)
             mail_queue.enqueue(send_mail, msg)
-            flash(gettext("We've sent you an email with account "
-                          "recovery instructions!"),
+            flash(gettext("We've sent you an email with account recovery instructions!"),
                   'success')
         else:
-            flash(gettext("We don't have this email in our records. "
-                          "You may have signed up with a different "
-                          "email or used Twitter, Facebook, or "
-                          "Google to sign-in"), 'error')
+            flash(gettext("We don't have this email in our records.You may have signed up with a different email"), 'error')
     if request.method == 'POST' and not form.validate():
         flash(gettext('Something went wrong, please correct the errors on the '
               'form'), 'error')
@@ -833,13 +850,59 @@ def start_export(name):
         return abort(404)
     if user.id != current_user.id:
         return abort(403)
+        
+    print("export user account method jan")
 
     ensure_authorized_to('update', user)
-    export_queue.enqueue(export_userdata,
-                         user_id=user.id)
+    export_userdata( user_id=user.id )
+    #export_queue.enqueue(export_userdata,
+    #                     user_id=user.id)
     msg = gettext('GDPR export started')
     flash(msg, 'success')
+    
+    print("export is finalised jan")
+    
     return redirect_content_type(url_for('account.profile', name=name))
+
+@blueprint.route('/<name>/project/<short_name>/contributions')
+@login_required
+def start_export_contributions(name,short_name):
+    """
+    Starts a export of all user data contributions per project according to EU GDPR
+
+    Data will be available on GET /contributions after it is processed
+
+    """
+    from pybossa.core import project_repo, task_repo, result_repo
+    from pybossa.exporter.json_export import JsonExporter
+    json_exporter = JsonExporter()
+
+    project = project_repo.get_by(short_name=short_name)
+    user = user_repo.get_by_name(name)
+
+    if not user:
+        return abort(404)
+    if user.id != current_user.id:
+        return abort(403)
+
+    ensure_authorized_to('update', user)
+    #export_queue.enqueue(export_userdata_contributions, #this was outcommented says Jan 20210430
+    #                     user_id=user.id,               #this was outcommented says Jan
+    #                    project_shortname=short_name)   #this was outcommented says Jan
+
+    #del user_data['passwd_hash']
+    taskruns = task_repo.filter_task_runs_by(user_id=user.id,project_id=project.id)
+    taskruns_data = [tr.dictize() for tr in taskruns]
+
+    ucf = None
+    if len(taskruns_data) > 0:
+        ucf = json_exporter._make_zip(None, '', 'user_contributions', taskruns_data, user.id,
+                                      'user_contributions.zip')
+
+    user_filename = 'user_'+str(user.id)+'/'+ucf
+    data = dict(msg='success',link=user_filename)
+    #return send_from_directory(uploader.upload_folder, user_filename)
+    return handle_content_type(data)
 
 
 @blueprint.route('/<name>/resetapikey', methods=['GET', 'POST'])
@@ -948,3 +1011,16 @@ def get_user_pref_and_metadata(user_name, form):
         if form.locations.data:
             user_pref['locations'] = form.locations.data
         return user_pref, metadata
+
+
+@blueprint.route('/save_forum_info/<name>', methods=['POST'])
+@login_required
+def save_forum_info(name):
+    user = user_repo.get_by_name(name=name)
+    ensure_authorized_to('update', user)
+    data=request.get_json()
+    user.info['forum_info'] = data
+    user_repo.update(user)
+    #flash("Input saved successfully", "info")
+    response = dict(status='success')
+    return handle_content_type(response)

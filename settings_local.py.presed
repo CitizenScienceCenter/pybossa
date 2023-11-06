@@ -16,27 +16,44 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with PyBossa.  If not, see <http://www.gnu.org/licenses/>.
 
+DEBUG = True
+
+## webserver host and port
+#PORT = 8080
+
+PLATFORM_URL = 'https://pb.citizenscience.ch'
+LAB_URL='https://lab.citizenscience.ch'
+PREFERRED_URL_SCHEME='https'
+INFO_RECIEPIENTS = 'lab@citizenscience.ch'
+
+WTF_CSRF_ENABLED = False
+WTF_CSRF_SSL_STRICT = False
+CSRF_ENABLED = False
+
 # DEBUG = False
 
 ## host for local development
 # HOST = '0.0.0.0'
 
+# anonymize the ip addresses
+CRYPTOPAN_KEY = 'BT5DOVi4Ejo9Q6uA4N5T8h4WqYKaL6BX'
+
 ## use SERVER_NAME instead of HOST for production environment with real URLs
 SERVER_NAME = 'pb.citizenscience.ch'
+PORT = 80
 
-## PORT used for local development, in production environment let nginx handle this
-# PORT = 5000
+# TODO: set these to something else
+SECRET = '{{PYBOSSA_SECRET}}'
+SECRET_KEY = '{{PYBOSSA_SECRET_KEY}}'
 
-SECRET = 'foobar'
-SECRET_KEY = 'my-session-secret'
-
-SQLALCHEMY_DATABASE_URI = 'postgresql://pybossa:tester@localhost/pybossa'
+SQLALCHEMY_DATABASE_URI = '{{POSTGRES_URL}}'
 
 ##Slave configuration for DB
 #SQLALCHEMY_BINDS = {
 #    'slave': 'postgresql://user:password@server/db'
 #}
 
+# TODO: set this to something else
 ITSDANGEROUSKEY = 'its-dangerous-key'
 
 ## project configuration
@@ -89,12 +106,20 @@ CONTACT_TWITTER = 'PyBossa'
 # LOG_LEVEL = logging.DEBUG
 
 ## Mail setup
-MAIL_SERVER = 'localhost'
-MAIL_USERNAME = None
-MAIL_PASSWORD = None
-MAIL_PORT = 25
-MAIL_FAIL_SILENTLY = False
-MAIL_DEFAULT_SENDER = 'PyBossa Support <info@pybossa.com>'
+#MAIL_SERVER = '{{PYBOSSA_MAIL_SERVER}}'
+#MAIL_USERNAME = {{PYBOSSA_MAIL_USERNAME}}
+#MAIL_PASSWORD = {{PYBOSSA_MAIL_PASSWORD}}
+#MAIL_PORT = {{PYBOSSA_MAIL_PORT}}
+#MAIL_FAIL_SILENTLY = {{PYBOSSA_MAIL_FAIL_SILENTLY}}
+#MAIL_DEFAULT_SENDER = "{{PYBOSSA_MAIL_DEFAULT_SENDER}}"
+
+## Mail setup
+MAIL_DEFAULT_SENDER='C3S Project Builder<no-reply@citizenscience.ch>'
+MAIL_SERVER='asmtp.mailstation.ch'
+MAIL_PORT=587
+#MAIL_USE_SSL=True
+MAIL_USERNAME = 'no-reply@citizenscience.ch'
+MAIL_PASSWORD = 'L6Ahfb3C'
 
 ## Announcement messages
 ## Use any combination of the next type of messages: root, user, and app owners
@@ -109,12 +134,20 @@ ENFORCE_PRIVACY = False
 ## Cache setup. By default it is enabled
 ## Redis Sentinel
 # List of Sentinel servers (IP, port)
-REDIS_SENTINEL = [('localhost', 26379)]
-REDIS_MASTER = 'mymaster'
-REDIS_DB = 0
-REDIS_KEYPREFIX = 'pybossa_cache'
+#PYBOSSA_REDIS_CACHE_DISABLED='1'
+REDIS_HOST = 'redis-master'
+REDIS_CACHE_ENABLED = True
+REDIS_SENTINEL = [('{{REDIS_SENTINEL}}', 26379)]
+REDIS_MASTER = 'redismaster'
+REDIS_DB = {{REDIS_DB}}
 REDIS_SOCKET_TIMEOUT = None
 REDIS_RETRY_ON_TIMEOUT = True
+REDIS_KEYPREFIX = 'pybossa_cache'
+RQ_DASHBOARD_REDIS_MASTER = '{{REDIS_MASTER}}'
+RQ_DASHBOARD_REDIS_DB = {{REDIS_DB}}
+RQ_DASHBOARD_REDIS_SENTINELS='{{REDIS_SENTINELS}}'
+# Uncomment this for rq_dashboard>=1.0
+RQ_DASHBOARD_REDIS_URL="redis+sentinel://{{REDIS_SENTINELS}}/{{REDIS_MASTER}}/{{REDIS_DB}}"
 
 ## Allowed upload extensions
 ALLOWED_EXTENSIONS = ['js', 'css', 'png', 'jpg', 'jpeg', 'gif', 'zip']
@@ -158,11 +191,14 @@ ACCOUNT_CONFIRMATION_DISABLED = True
 # MAILCHIMP_LIST_ID = "your-list-ID"
 
 # Flickr API key and secret
-# FLICKR_API_KEY = 'your-key'
-# FLICKR_SHARED_SECRET = 'your-secret'
+FLICKR_API_KEY = 'f508c1563035cdccfd15f8303150dd6a'
+FLICKR_SHARED_SECRET = '5cbd662ffbf56c97'
 
 # Dropbox app key
 DROPBOX_APP_KEY = 'pr913crgkexql03'
+
+TWITTER_CONSUMER_KEY='TaXNjhH6Rqz5iP6MkNf6aJFnk'
+TWITTER_CONSUMER_SECRET='WQOj5tNN0ctiFVdRbZXg00hKZsSYDqM4qzNKmZjUhaUZs1I2v2'
 
 # Send emails weekly update every
 # WEEKLY_UPDATE_STATS = 'Sunday'
@@ -177,9 +213,9 @@ DROPBOX_APP_KEY = 'pr913crgkexql03'
 # SSE = False
 
 # Add here any other ATOM feed that you want to get notified.
-NEWS_URL = ['https://github.com/Scifabric/enki/releases.atom',
-            'https://github.com/Scifabric/pybossa-client/releases.atom',
-            'https://github.com/Scifabric/pbs/releases.atom']
+NEWS_URL = ['https://github.com/pybossa/enki/releases.atom', 
+            'https://github.com/pybossa/pybossa-client/releases.atom',
+            'https://github.com/pybossa/pbs/releases.atom']
 
 # Pro user features. False will make the feature available to all regular users,
 # while True will make it available only to pro users
@@ -198,13 +234,10 @@ LIBSASS_STYLE = 'compressed'
 
 # CORS resources configuration.
 # WARNING: Only modify this if you know what you are doing. The below config
-# are the defaults, allowing PYBOSSA to have full CORS api.
+# are the defaults, allowing PYBOSSA to have full CORS api. 
 # For more options, check the Flask-Cors documentation: https://flask-cors.readthedocs.io/en/latest/
-# CORS_RESOURCES = {r"/api/*": {"origins": "*",
-#                               "allow_headers": ['Content-Type',
-#                                                 'Authorization'],
-#                               "methods": "*"
-#                               }}
+CORS_RESOURCES = {r"/*": {}}
+#CORS_RESOURCES = {r"/api/*": {"origins": "", "allow_headers": ['Content-Type','Authorization'],"methods": "*"}}
 
 # Email notifications for background jobs.
 # FAILED_JOBS_MAILS = 7
@@ -212,91 +245,3 @@ LIBSASS_STYLE = 'compressed'
 
 # Language to use stems, full text search, etc. from postgresql.
 # FULLTEXTSEARCH_LANGUAGE = 'english'
-
-
-# Use strict slashes at endpoints, by default True
-# This will return a 404 if and endpoint does not have the api/endpoint/
-# while if you configured as False, it will return the resource with and without the trailing /
-# STRICT_SLASHES = True
-
-# Use SSO on Disqus.com
-# DISQUS_SECRET_KEY = 'secret-key'
-# DISQUS_PUBLIC_KEY = 'public-key'
-
-# Use Web Push Notifications
-# ONESIGNAL_APP_ID = 'Your-app-id'
-# ONESIGNAL_API_KEY = 'your-app-key'
-
-
-# Enable two factor authentication
-# ENABLE_TWO_FACTOR_AUTH = True
-
-# Strong password policy for user accounts
-# ENABLE_STRONG_PASSWORD = True
-
-# Create new leaderboards based on info field keys from user
-# LEADERBOARDS = ['foo', 'bar']
-
-# Unpublish inactive projects
-# UNPUBLISH_PROJECTS = True
-
-# Use this config variable to create valid URLs for your SPA
-# SPA_SERVER_NAME = 'https://yourserver.com'
-
-# LDAP
-# LDAP_HOST = '127.0.0.1'
-# LDAP_BASE_DN = 'ou=users,dc=scifabric,dc=com'
-# LDAP_USERNAME = 'cn=yourusername,dc=scifabric,dc=com'
-# LDAP_PASSWORD = 'yourpassword'
-# LDAP_OBJECTS_DN = 'dn'
-# LDAP_OPENLDAP = True
-# Adapt it to your specific needs in your LDAP org
-# LDAP_USER_OBJECT_FILTER = '(&(objectclass=inetOrgPerson)(cn=%s))'
-# LDAP_USER_FILTER_FIELD = 'cn'
-# LDAP_PYBOSSA_FIELDS = {'fullname': 'givenName',
-#                        'name': 'uid',
-#                        'email_addr': 'cn'}
-
-# Flask profiler
-# FLASK_PROFILER = {
-#     "enabled": True,
-#     "storage": {
-#         "engine": "sqlite"
-#     },
-#     "basicAuth":{
-#         "enabled": True,
-#         "username": "admin",
-#         "password": "admin"
-#     },
-#     "ignore": [
-# 	    "^/static/.*"
-# 	]
-# }
-# Specify which key from the info field of task, task_run or result is going to be used as the root key
-# for exporting in CSV format
-# TASK_CSV_EXPORT_INFO_KEY = 'key'
-# TASK_RUN_CSV_EXPORT_INFO_KEY = 'key2'
-# RESULT_CSV_EXPORT_INFO_KEY = 'key3'
-
-# A 32 char string for AES encryption of public IPs.
-# NOTE: this is really important, don't use the following one
-# as anyone with the source code of pybossa will be able to reverse
-# the anonymization of the IPs.
-CRYPTOPAN_KEY = '32-char-str-for-AES-key-and-pad.'
-
-# TTL for ZIP files of personal data
-TTL_ZIP_SEC_FILES = 3
-
-# Instruct PYBOSSA to generate HTTP or HTTPS
-PREFERRED_URL_SCHEME='https'
-
-# Instruct PYBOSSA to generate absolute paths or not for avatars
-AVATAR_ABSOLUTE = True
-
-# Inactive users months to send email notification
-USER_INACTIVE_NOTIFICATION = 5
-# Inactive users months to delete users
-USER_INACTIVE_DELETE = 6
-
-# Inactive users email SQL query
-INACTIVE_USERS_SQL_QUERY = """SELECT user_id FROM task_run WHERE user_id IS NOT NULL AND to_date(task_run.finish_time, 'YYYY-MM-DD\THH24:MI:SS.US') >= NOW() - '12 month'::INTERVAL AND to_date(task_run.finish_time, 'YYYY-MM-DD\THH24:MI:SS.US') < NOW() - '3 month'::INTERVAL GROUP BY user_id ORDER BY user_id;"""

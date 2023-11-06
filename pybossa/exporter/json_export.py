@@ -46,6 +46,7 @@ class JsonExporter(Exporter):
 
     def _make_zip(self, project, ty, name=None, data=None, user_id=None,
                   zipname=None):
+        print( "json_export line 49" )                    
         if data:
             return self.handle_zip(name, data, ty,
                                    user_id, project,
@@ -67,6 +68,7 @@ class JsonExporter(Exporter):
         self._make_zip(project, "result")
 
     def handle_zip(self, name, data, ty, user_id, project, ext, zipname=None):
+        print("Start of handle zip Jan")
         zipped_datafile = tempfile.NamedTemporaryFile()
         _zip = self._zip_factory(zipped_datafile.name)
         try:
@@ -97,9 +99,10 @@ class JsonExporter(Exporter):
 
             if zipname and "_sec_" in zipname:
                 days = current_app.config.get('TTL_ZIP_SEC_FILES', 3)
-                scheduler.enqueue_in(timedelta(days=days),
-                                     uploader.delete_file,
-                                     zipname,
-                                     container)
+                print( " Close before scheduler starts Jan " )
+                #scheduler.enqueue_in(timedelta(days=days),
+                #                     uploader.delete_file,
+                #                     zipname,
+                #                     container)
             zipped_datafile.close()
             return zipname

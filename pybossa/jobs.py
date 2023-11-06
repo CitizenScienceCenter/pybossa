@@ -501,11 +501,30 @@ def warn_old_project_owners():
     return True
 
 
-def send_mail(message_dict, user_id=None):
+#def send_mail(message_dict, user_id=None):
+#    """Send email."""
+#    from pybossa.core import db
+#    from pybossa.model.user import User
+#    message = Message(**message_dict)
+#    spam = False
+#    for r in message_dict['recipients']:
+#        acc, domain = r.split('@')
+#        if domain in current_app.config.get('SPAM'):
+#            spam = True
+#            break
+#    if not spam:
+#        mail.send(message)
+#        if user_id:
+#            user = User.query.get(user_id)
+#            user.notified_at = datetime.now()
+#            db.session.add(user)
+#            db.session.commit()
+
+def send_mail(message_dict):
     """Send email."""
-    from pybossa.core import db
-    from pybossa.model.user import User
+    
     message = Message(**message_dict)
+    #print(message)
     spam = False
     for r in message_dict['recipients']:
         acc, domain = r.split('@')
@@ -514,11 +533,6 @@ def send_mail(message_dict, user_id=None):
             break
     if not spam:
         mail.send(message)
-        if user_id:
-            user = User.query.get(user_id)
-            user.notified_at = datetime.now()
-            db.session.add(user)
-            db.session.commit()
 
 
 def import_tasks(project_id, from_auto=False, **form_data):
@@ -834,6 +848,7 @@ def delete_account(user_id, **kwargs):
     send_mail(mail_dict)
 
 def export_userdata(user_id, **kwargs):
+    print( "start export user data jan jobs.py" )
     from pybossa.core import user_repo, project_repo, task_repo, result_repo
     from flask import current_app, url_for
     json_exporter = JsonExporter()
@@ -894,6 +909,50 @@ def export_userdata(user_id, **kwargs):
                      body=body,
                      html=html)
     send_mail(mail_dict)
+    
+
+def export_userdata_contributions(user_id,project_shortname, **kwargs):
+    from pybossa.core import user_repo, project_repo, task_repo, result_repo
+    from flask import current_app, url_for
+    json_exporter = JsonExporter()
+    user = user_repo.get(user_id)
+    del user_data['passwd_hash']
+
+    project, owner, ps = project_by_shortname(project_shortname)
+    
+    taskruns = task_repo.filter_task_runs_by(user_id=user.id,project_id=project.id)
+    taskruns_data = [tr.dictize() for tr in taskruns]
+    
+    ucf = None
+    if len(taskruns_data) > 0:
+        ucf = json_exporter._make_zip(None, '', 'user_contributions', taskruns_data, user_id,
+                                      'user_contributions.zip')
+    
+    response_dict = dict(msg='success',data=ucf)
+
+    return handle_content_type(data)
+
+
+def export_userdata_contributions(user_id,project_shortname, **kwargs):
+    from pybossa.core import user_repo, project_repo, task_repo, result_repo
+    from flask import current_app, url_for
+    json_exporter = JsonExporter()
+    user = user_repo.get(user_id)
+    del user_data['passwd_hash']
+
+    project, owner, ps = project_by_shortname(project_shortname)
+    
+    taskruns = task_repo.filter_task_runs_by(user_id=user.id,project_id=project.id)
+    taskruns_data = [tr.dictize() for tr in taskruns]
+    
+    ucf = None
+    if len(taskruns_data) > 0:
+        ucf = json_exporter._make_zip(None, '', 'user_contributions', taskruns_data, user_id,
+                                      'user_contributions.zip')
+    
+    response_dict = dict(msg='success',data=ucf)
+
+    return handle_content_type(data)
 
 
 def delete_file(fname, container):
@@ -941,7 +1000,7 @@ def get_notify_inactive_accounts(queue='monthly'):
                              html=html)
 
             job = dict(name=send_mail,
-                       args=[mail_dict, user.id],
+                       args=[mail_dict],
                        kwargs={},
                        timeout=timeout,
                        queue=queue)
@@ -954,9 +1013,19 @@ def get_delete_inactive_accounts(queue='bimonthly'):
     from pybossa.model.user import User
     from pybossa.core import db
     timeout = current_app.config.get('TIMEOUT')
-    time = current_app.config.get('USER_DELETE_AFTER_NOTIFICATION', '1 month')
+    time = current_app.config.get('USER_INACTIVE_DELETE')
 
-    sql = f"select * from \"user\" where notified_at < NOW() - INTERVAL '{time}';"
+    sql = text('''SELECT "user".id from "user", task_run
+               WHERE "user".id = task_run.user_id AND "user".id NOT IN
+               (SELECT user_id FROM task_run
+               WHERE user_id IS NOT NULL
+               AND to_date(task_run.finish_time, 'YYYY-MM-DD\THH24:MI:SS.US')
+               >= NOW() - '{} month'::INTERVAL
+               GROUP BY user_id
+               ORDER BY user_id) AND
+               "user".admin=false
+               GROUP BY "user".id ORDER BY "user".id
+               ;'''.format(time))
 
     results = db.slave_session.execute(sql)
 
