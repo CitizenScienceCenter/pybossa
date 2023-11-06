@@ -791,38 +791,16 @@ def forgot_password():
         if user and user.email_addr:
             msg = dict(subject='Account Recovery',
                        recipients=[user.email_addr])
-            if user.twitter_user_id:
-                msg['body'] = render_template(
-                    '/account/email/forgot_password_openid.md',
-                    user=user, account_name='Twitter')
-                msg['html'] = render_template(
-                    '/account/email/forgot_password_openid.html',
-                    user=user, account_name='Twitter')
-            elif user.facebook_user_id:
-                msg['body'] = render_template(
-                    '/account/email/forgot_password_openid.md',
-                    user=user, account_name='Facebook')
-                msg['html'] = render_template(
-                    '/account/email/forgot_password_openid.html',
-                    user=user, account_name='Facebook')
-            elif user.google_user_id:
-                msg['body'] = render_template(
-                    '/account/email/forgot_password_openid.md',
-                    user=user, account_name='Google')
-                msg['html'] = render_template(
-                    '/account/email/forgot_password_openid.html',
-                    user=user, account_name='Google')
-            else:
-                userdict = {'user': user.name, 'password': user.passwd_hash}
-                key = signer.dumps(userdict, salt='password-reset')
-                recovery_url = url_for_app_type('.reset_password',
-                                                key=key, _external=True)
-                msg['body'] = render_template(
-                    '/account/email/forgot_password.md',
-                    user=user, recovery_url=recovery_url)
-                msg['html'] = render_template(
-                    '/account/email/forgot_password.html',
-                    user=user, recovery_url=recovery_url)
+            userdict = {'user': user.name, 'password': user.passwd_hash}
+            key = signer.dumps(userdict, salt='password-reset')
+            recovery_url = url_for_app_type('.reset_password',
+                                            key=key, _external=True)
+            msg['body'] = render_template(
+                '/account/email/forgot_password.md',
+                user=user, recovery_url=recovery_url)
+            msg['html'] = render_template(
+                '/account/email/forgot_password.html',
+                user=user, recovery_url=recovery_url)
             mail_queue.enqueue(send_mail, msg)
             flash(gettext("We've sent you an email with account recovery instructions!"),
                   'success')
