@@ -1,6 +1,3 @@
 [submodule "pybossa/themes/default"]
 	path = pybossa/themes/default
 	url = https://github.com/Scifabric/pybossa-default-theme
-# [submodule "pybossa/forms/mindlogger_backend_script"]
-# 	path = pybossa/forms/mindlogger_backend_script
-# 	url = git@github.com:CitizenScienceCenter/mindlogger-backend-script.git
