@@ -2015,13 +2015,13 @@ def approve(short_name):
 
         platform_url = current_app.config.get('PLATFORM_URL')
         lab_url = current_app.config.get('LAB_URL')
-        mail_recipients = current_app.config.get('INFO_RECIEPIENTS')
+        mail_recipients = current_app.config.get('PUBLISH_APPROVALS_RECIEPIENTS')
 
         project_url_pybossa = platform_url+'/project/'+project.short_name+'/publish'
         project_url_lab = lab_url+'/project/'+str(project.id)
 
         msg = dict(subject='Project approval',
-                       recipients=[mail_recipients]) #change here to c3s admin
+                       recipients=mail_recipients) #change here to c3s admin
 
         msg['body'] = render_template(
                     '/projects/email/project_approval.md',
