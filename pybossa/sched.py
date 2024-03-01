@@ -45,7 +45,9 @@ def new_task(project_id, sched, user_id=None, user_ip=None,
     sched_map = {
         'default': get_depth_first_task,
         'breadth_first': get_breadth_first_task,
+        'breadth_first_random': get_breadth_first_random_task,
         'depth_first': get_depth_first_task,
+        'dept_first_random': get_depth_first_random_task,
         'incremental': get_incremental_task,
         'depth_first_all': get_depth_first_all_task,
         'locked': get_locked_task}
@@ -105,6 +107,34 @@ def get_breadth_first_task(project_id, user_id=None, user_ip=None,
     data = query.limit(limit).offset(offset).all()
     return _handle_tuples(data)
 
+def get_breadth_first_random_task(project_id, user_id=None, user_ip=None,
+                           external_uid=None, offset=0, limit=1, orderby='random', desc=False):
+    """Get a new task which have the least number of task runs."""
+    project_query = session.query(Task.id).filter(Task.project_id==project_id,
+                                                  Task.state!='completed')
+    if user_id and not user_ip and not external_uid:
+        subquery = session.query(TaskRun.task_id).filter_by(project_id=project_id,
+                                                            user_id=user_id)
+    else:
+        if not user_ip:  # pragma: no cover
+            user_ip = '127.0.0.1'
+        if user_ip and not external_uid:
+            subquery = session.query(TaskRun.task_id).filter_by(project_id=project_id,
+                                                                user_ip=user_ip)
+        else:
+            subquery = session.query(TaskRun.task_id).filter_by(project_id=project_id,
+                                                                external_uid=external_uid)
+
+    tmp = project_query.except_(subquery)
+    query = session.query(Task, func.sum(Counter.n_task_runs).label('n_task_runs'))\
+                   .filter(Task.id==Counter.task_id)\
+                   .filter(Counter.task_id.in_(tmp))\
+                   .group_by(Task.id)\
+                   .order_by(text('n_task_runs ASC'))\
+
+    query = _set_orderby_desc(query, 'random', desc)
+    data = query.limit(limit).offset(offset).all()
+    return _handle_tuples(data)
 
 def get_depth_first_task(project_id, user_id=None, user_ip=None,
                          external_uid=None, offset=0, limit=1,
@@ -115,6 +145,14 @@ def get_depth_first_task(project_id, user_id=None, user_ip=None,
                                    orderby=orderby, desc=desc)
     return tasks
 
+def get_depth_first_random_task(project_id, user_id=None, user_ip=None,
+                         external_uid=None, offset=0, limit=1,
+                         orderby='random', desc=True):
+    """Get a new task for a given project."""
+    tasks = get_candidate_task_ids(project_id, user_id,
+                                   user_ip, external_uid, limit, offset,
+                                   orderby='random', desc=desc)
+    return tasks
 
 def get_depth_first_all_task(project_id, user_id=None, user_ip=None,
                              external_uid=None, offset=0, limit=1,
@@ -279,7 +317,9 @@ def get_project_scheduler(project_id, conn):
 
 def sched_variants():
     return [('default', 'Default'), ('breadth_first', 'Breadth First'),
+            ('breadth_first_random', 'Breadth First Random'),
             ('depth_first', 'Depth First'),
+            ('depth_first_random', 'Depth First Random'),
             ('depth_first_all', 'Depth First All'),
             ('locked', 'Locked')
             ]
@@ -294,6 +334,8 @@ def _set_orderby_desc(query, orderby, descending):
             query = query.order_by(desc("n_favs"))
         else:
             query = query.order_by("n_favs")
+    elif orderby == 'random':
+        query = query.order_by(func.random())
     else:
         if descending:
             query = query.order_by(getattr(Task, orderby).desc())
