@@ -824,13 +824,28 @@ def push_notification(project_id, **kwargs):
 
 def delete_account(user_id, **kwargs):
     """Delete user account from the system."""
-    from pybossa.core import user_repo
+    from pybossa.core import user_repo, project_repo
     from pybossa.core import newsletter
+
     newsletter.init_app(current_app)
     user = user_repo.get(user_id)
     email = user.email_addr
     brand = current_app.config.get('BRAND')
+
+    # Get most recently created admin user to transfer projects to
+    admin = user_repo.get_by(admin=True).last()
+    if not admin:
+        raise Exception('No admin user found to transfer projects to')
+
+    # Transfer project ownership before deleting user
+    projects = project_repo.filter_by(owner_id=user.id)
+    for project in projects:
+        project.owner_id = admin.id
+        project_repo.update(project)
+
+    # Now delete the user
     user_repo.delete(user)
+    
     subject = '[%s]: Your account has been deleted' % brand
     mailchimp_deleted = True
     body = """Hi,\nYour account and personal data has been deleted from %s.""" % brand
