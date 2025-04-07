@@ -1034,7 +1034,7 @@ def get_delete_inactive_accounts(queue='bimonthly'):
                WHERE "user".id = task_run.user_id AND "user".id NOT IN
                (SELECT user_id FROM task_run
                WHERE user_id IS NOT NULL
-               AND to_date(task_run.finish_time, 'YYYY-MM-DD\THH24:MI:SS.US')
+               AND to_timestamp(task_run.finish_time, 'YYYY-MM-DD"T"HH24:MI:SS.US')::timestamp
                >= NOW() - '{} month'::INTERVAL
                GROUP BY user_id
                ORDER BY user_id) AND
